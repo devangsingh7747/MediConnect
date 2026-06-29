@@ -1,5 +1,8 @@
 package com.devang.mediconnect.controller;
 
+import java.util.List;
+
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,5 +24,10 @@ public class PatientController {
     @PostMapping
     public Patient savePatient(@RequestBody Patient patient) {
         return patientService.savePatient(patient);
+    }
+
+    @GetMapping
+    public List<Patient> getAllPatients() {
+        return patientService.getAllPatients();
     }
 }
