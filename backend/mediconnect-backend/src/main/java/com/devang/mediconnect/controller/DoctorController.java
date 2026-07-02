@@ -2,6 +2,7 @@ package com.devang.mediconnect.controller;
 
 import java.util.List;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -45,9 +46,9 @@ public class DoctorController {
     }
 
     @DeleteMapping("/{id}")
-    public String deleteDoctor(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteDoctor(@PathVariable Long id) {
         doctorService.deleteDoctor(id);
-        return "Doctor deleted successfully!";
+        return ResponseEntity.noContent().build();
     }
 
 }

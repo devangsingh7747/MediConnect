@@ -1,12 +1,14 @@
 package com.devang.mediconnect.service.impl;
 
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.devang.mediconnect.entity.User;
 import com.devang.mediconnect.repository.UserRepository;
-import com.devang.mediconnect.service.UserService;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import com.devang.mediconnect.security.JwtUtil;
+import com.devang.mediconnect.service.UserService;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -14,14 +16,17 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
+    private final AuthenticationManager authenticationManager;
 
     public UserServiceImpl(UserRepository userRepository,
                     BCryptPasswordEncoder passwordEncoder,
-                    JwtUtil jwtUtil) {
+                    JwtUtil jwtUtil,
+                    AuthenticationManager authenticationManager) {
 
     this.userRepository = userRepository;
     this.passwordEncoder = passwordEncoder;
     this.jwtUtil = jwtUtil;
+    this.authenticationManager = authenticationManager;
 }
 
     @Override
@@ -40,15 +45,15 @@ public class UserServiceImpl implements UserService {
     @Override
     public String loginUser(String email, String password) {
 
-        User user = userRepository.findByEmail(email).orElse(null);
+        authenticationManager.authenticate(
+            new UsernamePasswordAuthenticationToken(email, password)
+        );
 
-        if (user == null) {
-            return null;
-        }
+    User user = userRepository.findByEmail(email).orElse(null);
 
-        if (!passwordEncoder.matches(password, user.getPassword())) {
-            return null;
-        }
+    if (user == null) {
+        return null;
+    }
 
         return jwtUtil.generateToken(user.getEmail());
     }

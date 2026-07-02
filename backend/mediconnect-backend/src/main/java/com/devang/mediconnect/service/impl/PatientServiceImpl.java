@@ -53,6 +53,8 @@ public class PatientServiceImpl implements PatientService {
 
     @Override
     public void deletePatient(Long id) {
+
         patientRepository.deleteById(id);
+
     }
 }
