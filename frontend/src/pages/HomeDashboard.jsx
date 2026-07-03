@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+import PatientsChart from "../components/dashboard/PatientsChart";
+import AppointmentPieChart from "../components/dashboard/AppointmentPieChart";
+
 import {
     FaUserInjured,
     FaUserMd,
@@ -18,31 +21,37 @@ const HomeDashboard = () => {
     const [doctorCount, setDoctorCount] = useState(0);
     const [appointmentCount, setAppointmentCount] = useState(0);
 
+    const [recentPatients, setRecentPatients] = useState([]);
+    const [recentDoctors, setRecentDoctors] = useState([]);
+    const [recentAppointments, setRecentAppointments] = useState([]);
+
     const navigate = useNavigate();
 
-    const user = JSON.parse(localStorage.getItem("user"));
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
+
+    const fetchDashboardData = async () => {
+
+        try {
+
+            const response = await api.get("/dashboard");
+
+            setPatientCount(response.data.patientCount);
+            setDoctorCount(response.data.doctorCount);
+            setAppointmentCount(response.data.appointmentCount);
+
+            setRecentPatients(response.data.recentPatients);
+            setRecentDoctors(response.data.recentDoctors);
+            setRecentAppointments(response.data.recentAppointments);
+
+        } catch (error) {
+
+            console.error("Failed to load dashboard:", error);
+
+        }
+
+    };
 
     useEffect(() => {
-
-        const fetchDashboardData = async () => {
-
-            try {
-
-                const patients = await api.get("/patients");
-                const doctors = await api.get("/doctors");
-                const appointments = await api.get("/appointments");
-
-                setPatientCount(patients.data.length);
-                setDoctorCount(doctors.data.length);
-                setAppointmentCount(appointments.data.length);
-
-            } catch (error) {
-
-                console.error(error);
-
-            }
-
-        };
 
         fetchDashboardData();
 
@@ -53,9 +62,13 @@ const HomeDashboard = () => {
     let greeting = "Good Evening";
 
     if (hour < 12) {
+
         greeting = "Good Morning";
+
     } else if (hour < 18) {
+
         greeting = "Good Afternoon";
+
     }
 
     return (
@@ -65,14 +78,18 @@ const HomeDashboard = () => {
             <div className="p-8">
 
                 <h1 className="text-4xl font-bold text-gray-800">
+
                     {greeting}, {user?.fullName} 👋
+
                 </h1>
 
                 <p className="text-gray-500 mt-2 mb-8">
+
                     Manage patients, doctors and appointments from one dashboard.
+
                 </p>
 
-                {/* Stats */}
+                {/* Stats Cards */}
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
 
@@ -81,6 +98,7 @@ const HomeDashboard = () => {
                         value={patientCount}
                         color="text-blue-600"
                         icon={<FaUserInjured className="text-blue-600" />}
+                        onClick={() => navigate("/dashboard")}
                     />
 
                     <StatsCard
@@ -88,6 +106,7 @@ const HomeDashboard = () => {
                         value={doctorCount}
                         color="text-green-600"
                         icon={<FaUserMd className="text-green-600" />}
+                        onClick={() => navigate("/doctor-dashboard")}
                     />
 
                     <StatsCard
@@ -95,6 +114,7 @@ const HomeDashboard = () => {
                         value={appointmentCount}
                         color="text-purple-600"
                         icon={<FaCalendarCheck className="text-purple-600" />}
+                        onClick={() => navigate("/appointment-dashboard")}
                     />
 
                     <StatsCard
@@ -102,6 +122,7 @@ const HomeDashboard = () => {
                         value={appointmentCount}
                         color="text-orange-600"
                         icon={<FaClipboardList className="text-orange-600" />}
+                        onClick={() => navigate("/appointment-dashboard")}
                     />
 
                 </div>
@@ -115,7 +136,9 @@ const HomeDashboard = () => {
                     <div className="bg-white rounded-2xl shadow-md p-6">
 
                         <h2 className="text-2xl font-semibold mb-6">
+
                             Quick Actions
+
                         </h2>
 
                         <div className="grid grid-cols-2 gap-4">
@@ -136,11 +159,15 @@ const HomeDashboard = () => {
                             >
 
                                 <div className="flex justify-center mb-4">
+
                                     <FaUserInjured className="text-4xl text-blue-600" />
+
                                 </div>
 
                                 <p className="text-center font-semibold">
+
                                     Patients
+
                                 </p>
 
                             </button>
@@ -161,11 +188,15 @@ const HomeDashboard = () => {
                             >
 
                                 <div className="flex justify-center mb-4">
+
                                     <FaUserMd className="text-4xl text-green-600" />
+
                                 </div>
 
                                 <p className="text-center font-semibold">
+
                                     Doctors
+
                                 </p>
 
                             </button>
@@ -186,17 +217,21 @@ const HomeDashboard = () => {
                             >
 
                                 <div className="flex justify-center mb-4">
+
                                     <FaCalendarCheck className="text-4xl text-purple-600" />
+
                                 </div>
 
                                 <p className="text-center font-semibold">
+
                                     Appointments
+
                                 </p>
 
                             </button>
 
                             <button
-                                onClick={() => alert("Coming Soon")}
+                                onClick={() => alert("Reports module is under development 🚀")}
                                 className="
                                     bg-orange-50
                                     hover:bg-orange-100
@@ -211,11 +246,15 @@ const HomeDashboard = () => {
                             >
 
                                 <div className="flex justify-center mb-4">
+
                                     <FaClipboardList className="text-4xl text-orange-600" />
+
                                 </div>
 
                                 <p className="text-center font-semibold">
+
                                     Reports
+
                                 </p>
 
                             </button>
@@ -229,46 +268,99 @@ const HomeDashboard = () => {
                     <div className="bg-white rounded-2xl shadow-md p-6">
 
                         <h2 className="text-2xl font-semibold mb-6">
+
                             Recent Activity
+
                         </h2>
 
                         <div className="space-y-5">
 
-                            <div className="border-l-4 border-blue-500 pl-4">
+                            {/* Recent Patients */}
 
-                                <p className="font-medium">
-                                    Patient added successfully
-                                </p>
+                            {recentPatients.map((patient) => (
 
-                                <span className="text-sm text-gray-500">
-                                    Just now
-                                </span>
+                                <div
+                                    key={`patient-${patient.id}`}
+                                    className="border-l-4 border-blue-500 pl-4"
+                                >
 
-                            </div>
+                                    <p className="font-medium">
 
-                            <div className="border-l-4 border-green-500 pl-4">
+                                        👤 New Patient:{" "}
 
-                                <p className="font-medium">
-                                    Doctor profile updated
-                                </p>
+                                        <span className="font-bold">
 
-                                <span className="text-sm text-gray-500">
-                                    Today
-                                </span>
+                                            {patient.firstName} {patient.lastName}
 
-                            </div>
+                                        </span>
 
-                            <div className="border-l-4 border-purple-500 pl-4">
+                                    </p>
 
-                                <p className="font-medium">
-                                    Appointment booked
-                                </p>
+                                    <span className="text-sm text-gray-500">
 
-                                <span className="text-sm text-gray-500">
-                                    Today
-                                </span>
+                                        {patient.email}
 
-                            </div>
+                                    </span>
+
+                                </div>
+
+                            ))}
+
+                            {/* Recent Doctors */}
+
+                            {recentDoctors.map((doctor) => (
+
+                                <div
+                                    key={`doctor-${doctor.id}`}
+                                    className="border-l-4 border-green-500 pl-4"
+                                >
+
+                                    <p className="font-medium">
+
+                                        👨‍⚕️ New Doctor:{" "}
+
+                                        <span className="font-bold">
+
+                                            Dr. {doctor.firstName} {doctor.lastName}
+
+                                        </span>
+
+                                    </p>
+
+                                    <span className="text-sm text-gray-500">
+
+                                        {doctor.specialization}
+
+                                    </span>
+
+                                </div>
+
+                            ))}
+
+                            {/* Recent Appointments */}
+
+                            {recentAppointments.map((appointment) => (
+
+                                <div
+                                    key={`appointment-${appointment.id}`}
+                                    className="border-l-4 border-purple-500 pl-4"
+                                >
+
+                                    <p className="font-medium">
+
+                                        📅 Appointment Booked
+
+                                    </p>
+
+                                    <span className="text-sm text-gray-500">
+
+                                        {appointment.patientName} → {appointment.doctorName}
+
+                                    </span>
+
+                                </div>
+
+                            ))}
 
                         </div>
 
@@ -276,6 +368,14 @@ const HomeDashboard = () => {
 
                 </div>
 
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-10">
+
+                    <PatientsChart />
+
+                    <AppointmentPieChart />
+
+                </div>
+                
             </div>
 
         </Layout>

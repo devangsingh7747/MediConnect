@@ -1,8 +1,9 @@
-const StatsCard = ({ title, value, icon, color }) => {
+const StatsCard = ({ title, value, icon, color, onClick }) => {
 
     return (
 
         <div
+            onClick={onClick}
             className="
                 cursor-pointer
                 bg-white
