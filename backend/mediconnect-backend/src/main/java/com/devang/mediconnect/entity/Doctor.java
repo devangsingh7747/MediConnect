@@ -1,9 +1,12 @@
 package com.devang.mediconnect.entity;
 
+import java.time.LocalDateTime;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 
 @Entity
@@ -30,7 +33,14 @@ public class Doctor {
 
     private String availability;
 
+    private LocalDateTime createdAt;
+
     public Doctor() {
+    }
+
+    @PrePersist
+    public void prePersist() {
+        this.createdAt = LocalDateTime.now();
     }
 
     public Long getId() {
@@ -104,4 +114,13 @@ public class Doctor {
     public void setAvailability(String availability) {
         this.availability = availability;
     }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
 }

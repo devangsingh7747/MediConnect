@@ -34,6 +34,8 @@ public class UserServiceImpl implements UserService {
 
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
+        user.setRole("PATIENT");
+
         return userRepository.save(user);
     }
 
@@ -45,15 +47,28 @@ public class UserServiceImpl implements UserService {
     @Override
     public String loginUser(String email, String password) {
 
-        authenticationManager.authenticate(
-            new UsernamePasswordAuthenticationToken(email, password)
-        );
+        try {
 
-    User user = userRepository.findByEmail(email).orElse(null);
+            System.out.println("Email: " + email);
+            System.out.println("Password: " + password);
 
-    if (user == null) {
-        return null;
-    }
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(email, password));
+
+            System.out.println("Authentication Successful");
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+            throw e;
+        }
+
+        User user = userRepository.findByEmail(email).orElse(null);
+
+        if (user == null) {
+            return null;
+        }
 
         return jwtUtil.generateToken(user.getEmail());
     }

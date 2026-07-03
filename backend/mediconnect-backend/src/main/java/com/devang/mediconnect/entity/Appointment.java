@@ -1,9 +1,12 @@
 package com.devang.mediconnect.entity;
 
+import java.time.LocalDateTime;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
 
 @Entity
 public class Appointment {
@@ -13,17 +16,33 @@ public class Appointment {
     private Long id;
 
     private String patientName;
+
     private String doctorName;
+
     private String appointmentDate;
+
     private String appointmentTime;
+
     private String status;
+
+    private LocalDateTime createdAt;
 
     public Appointment() {
     }
 
-    public Appointment(Long id, String patientName, String doctorName,
-                    String appointmentDate, String appointmentTime,
-                    String status) {
+    @PrePersist
+    public void prePersist() {
+        this.createdAt = LocalDateTime.now();
+    }
+
+    public Appointment(
+            Long id,
+            String patientName,
+            String doctorName,
+            String appointmentDate,
+            String appointmentTime,
+            String status) {
+
         this.id = id;
         this.patientName = patientName;
         this.doctorName = doctorName;
@@ -79,4 +98,13 @@ public class Appointment {
     public void setStatus(String status) {
         this.status = status;
     }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
 }

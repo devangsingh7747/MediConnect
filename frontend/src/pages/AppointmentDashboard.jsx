@@ -1,42 +1,49 @@
 import { useEffect, useState, useCallback } from "react";
 import api from "../services/api";
-import PatientForm from "../components/patient/PatientForm";
+import AppointmentForm from "../components/appointment/AppointmentForm";
 import Layout from "../components/layout/Layout";
 
-const Dashboard = () => {
+const AppointmentDashboard = () => {
 
-    const [patients, setPatients] = useState([]);
-    const [editingPatient, setEditingPatient] = useState(null);
+    const [appointments, setAppointments] = useState([]);
+    const [editingAppointment, setEditingAppointment] = useState(null);
 
-    const fetchPatients = useCallback(async () => {
+    const fetchAppointments = useCallback(async () => {
+
         try {
-            const response = await api.get("/patients");
-            setPatients(response.data);
+
+            const response = await api.get("/appointments");
+
+            setAppointments(response.data);
+
         } catch (error) {
-            console.error("Failed to fetch patients:", error);
+
+            console.error("Failed to fetch appointments:", error);
+
         }
+
     }, []);
 
-    const addPatient = async (patient) => {
+    const saveAppointment = async (appointment) => {
 
         try {
 
-            if (editingPatient) {
+            if (editingAppointment) {
 
                 await api.put(
-                    `/patients/${editingPatient.id}`,
-                    patient
+                    `/appointments/${editingAppointment.id}`,
+                    appointment
                 );
 
-                setEditingPatient(null);
+                setEditingAppointment(null);
 
             } else {
 
-                await api.post("/patients", patient);
+                await api.post("/appointments", appointment);
 
             }
 
-            await fetchPatients();
+            fetchAppointments();
 
         } catch (error) {
 
@@ -48,133 +55,165 @@ const Dashboard = () => {
 
     };
 
-
-    const deletePatient = async (id) => {
+    const deleteAppointment = async (id) => {
 
         const confirmDelete = window.confirm(
-            "Are you sure you want to delete this patient?"
+            "Are you sure you want to delete this appointment?"
         );
 
         if (!confirmDelete) return;
 
         try {
 
-            await api.delete(`/patients/${id}`);
+            await api.delete(`/appointments/${id}`);
 
-            fetchPatients();
+            fetchAppointments();
 
         } catch (error) {
 
             console.error(error);
 
-            alert("Failed to delete patient.");
+            alert("Failed to delete appointment.");
 
         }
 
     };
 
-
     useEffect(() => {
-        fetchPatients();
-    }, [fetchPatients]);
+
+        fetchAppointments();
+
+    }, [fetchAppointments]);
 
     return (
         <Layout>
+
             <div className="p-6">
+
                 <h1 className="text-3xl font-bold mb-6">
-                    Patient Dashboard
+                    Appointment Dashboard
                 </h1>
 
-                <PatientForm
-                    onSubmit={addPatient}
-                    editingPatient={editingPatient}
+                <AppointmentForm
+                    onSubmit={saveAppointment}
+                    editingAppointment={editingAppointment}
                 />
 
                 <div className="bg-white rounded-xl shadow p-6">
+
                     <h2 className="text-xl font-semibold mb-4">
-                        Patients
+                        Appointments
                     </h2>
 
-                    {patients.length === 0 ? (
-                        <p className="text-gray-500">No patients found.</p>
+                    {appointments.length === 0 ? (
+
+                        <p className="text-gray-500">
+                            No appointments found.
+                        </p>
+
                     ) : (
+
                         <table className="w-full border-collapse">
+
                             <thead>
+
                                 <tr className="bg-gray-100">
+
                                     <th className="border p-3">ID</th>
-                                    <th className="border p-3">First Name</th>
-                                    <th className="border p-3">Last Name</th>
-                                    <th className="border p-3">Email</th>
-                                    <th className="border p-3">Phone</th>
-                                    <th className="border p-3">Age</th>
-                                    <th className="border p-3">Gender</th>
+
+                                    <th className="border p-3">Patient</th>
+
+                                    <th className="border p-3">Doctor</th>
+
+                                    <th className="border p-3">Date</th>
+
+                                    <th className="border p-3">Time</th>
+
+                                    <th className="border p-3">Status</th>
+
                                     <th className="border p-3">Actions</th>
+
                                 </tr>
+
                             </thead>
 
                             <tbody>
-                                {patients.map((patient) => (
+
+                                {appointments.map((appointment) => (
+
                                     <tr
-                                        key={patient.id}
+                                        key={appointment.id}
                                         className="text-center hover:bg-gray-50"
                                     >
+
                                         <td className="border p-3">
-                                            {patient.id}
+                                            {appointment.id}
                                         </td>
 
                                         <td className="border p-3">
-                                            {patient.firstName}
+                                            {appointment.patientName}
                                         </td>
 
                                         <td className="border p-3">
-                                            {patient.lastName}
+                                            {appointment.doctorName}
                                         </td>
 
                                         <td className="border p-3">
-                                            {patient.email}
+                                            {appointment.appointmentDate}
                                         </td>
 
                                         <td className="border p-3">
-                                            {patient.phone}
+                                            {appointment.appointmentTime}
                                         </td>
 
                                         <td className="border p-3">
-                                            {patient.age}
+                                            {appointment.status}
                                         </td>
 
                                         <td className="border p-3">
-                                            {patient.gender}
-                                        </td>
 
-                                        <td className="border p-3">
                                             <div className="flex justify-center gap-2">
+
                                                 <button
-                                                    onClick={() => setEditingPatient(patient)}
+                                                    onClick={() =>
+                                                        setEditingAppointment(appointment)
+                                                    }
                                                     className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded-lg transition"
                                                 >
                                                     Edit
                                                 </button>
 
                                                 <button
-                                                    onClick={() => deletePatient(patient.id)}
+                                                    onClick={() =>
+                                                        deleteAppointment(appointment.id)
+                                                    }
                                                     className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-lg transition"
                                                 >
                                                     Delete
                                                 </button>
+
                                             </div>
+
                                         </td>
+
                                     </tr>
+
                                 ))}
+
                             </tbody>
 
-
                         </table>
+
                     )}
 
                 </div>
+
             </div>
+
         </Layout>
+
     );
+
 };
 
-export default Dashboard;
+export default AppointmentDashboard;

@@ -27,7 +27,15 @@ const LoginForm = () => {
 
             localStorage.setItem("token", response.data.token);
 
-            navigate("/dashboard");
+            // Fetch logged-in user
+            const userResponse = await api.get("/users/me");
+
+            localStorage.setItem(
+                "user",
+                JSON.stringify(userResponse.data)
+            );
+
+            navigate("/home");
 
         } catch (error) {
 
