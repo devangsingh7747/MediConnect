@@ -29,4 +29,18 @@ public class DashboardController {
         return dashboardService.getAppointmentStatus();
     }
 
+    @GetMapping("/patient-growth")
+    public Map<String, Long> getPatientGrowth() {
+
+        return dashboardService.getPatientGrowth();
+
+    }
+
+    @GetMapping("/doctor-specialization")
+    public Map<String, Long> getDoctorSpecializationStats() {
+
+        return dashboardService.getDoctorSpecializationStats();
+
+    }
+
 }

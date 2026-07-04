@@ -1,34 +1,36 @@
 import { useEffect, useState } from "react";
 
 import {
-    LineChart,
-    Line,
+    BarChart,
+    Bar,
     XAxis,
     YAxis,
-    CartesianGrid,
     Tooltip,
-    ResponsiveContainer
+    ResponsiveContainer,
+    CartesianGrid
 } from "recharts";
 
 import api from "../../services/api";
 
-const PatientsChart = () => {
+const DoctorSpecializationChart = () => {
 
     const [chartData, setChartData] = useState([]);
 
-    const fetchPatientGrowth = async () => {
+    const fetchSpecializations = async () => {
 
         try {
 
-            const response = await api.get("/dashboard/patient-growth");
+            const response = await api.get("/dashboard/doctor-specialization");
 
             const formattedData = Object.entries(response.data).map(
-                ([month, patients]) => ({
 
-                    month,
-                    patients
+                ([specialization, doctors]) => ({
+
+                    specialization,
+                    doctors
 
                 })
+
             );
 
             setChartData(formattedData);
@@ -40,13 +42,12 @@ const PatientsChart = () => {
         }
 
     };
-    
+
     useEffect(() => {
 
-        fetchPatientGrowth();
+        fetchSpecializations();
 
     }, []);
-
 
     return (
 
@@ -54,7 +55,7 @@ const PatientsChart = () => {
 
             <h2 className="text-2xl font-semibold mb-6">
 
-                Patient Growth
+                Doctors by Specialization
 
             </h2>
 
@@ -63,24 +64,23 @@ const PatientsChart = () => {
                 height={300}
             >
 
-                <LineChart data={chartData}>
+                <BarChart data={chartData}>
 
                     <CartesianGrid strokeDasharray="3 3" />
 
-                    <XAxis dataKey="month" />
+                    <XAxis dataKey="specialization" />
 
                     <YAxis allowDecimals={false} />
 
                     <Tooltip />
 
-                    <Line
-                        type="monotone"
-                        dataKey="patients"
-                        stroke="#2563eb"
-                        strokeWidth={3}
+                    <Bar
+                        dataKey="doctors"
+                        fill="#2563eb"
+                        radius={[8, 8, 0, 0]}
                     />
 
-                </LineChart>
+                </BarChart>
 
             </ResponsiveContainer>
 
@@ -90,4 +90,4 @@ const PatientsChart = () => {
 
 };
 
-export default PatientsChart;
+export default DoctorSpecializationChart;

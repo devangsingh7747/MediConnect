@@ -19,6 +19,8 @@ public class Appointment {
 
     private String patientName;
 
+    private String problem;
+
     private String doctorName;
 
     private String appointmentDate;
@@ -37,6 +39,7 @@ public class Appointment {
     public Appointment(
             Long id,
             String patientName,
+            String problem,
             String doctorName,
             String appointmentDate,
             String appointmentTime,
@@ -44,6 +47,7 @@ public class Appointment {
 
         this.id = id;
         this.patientName = patientName;
+        this.problem = problem;
         this.doctorName = doctorName;
         this.appointmentDate = appointmentDate;
         this.appointmentTime = appointmentTime;
@@ -64,6 +68,14 @@ public class Appointment {
 
     public void setPatientName(String patientName) {
         this.patientName = patientName;
+    }
+
+    public String getProblem() {
+        return problem;
+    }
+
+    public void setProblem(String problem) {
+        this.problem = problem;
     }
 
     public String getDoctorName() {

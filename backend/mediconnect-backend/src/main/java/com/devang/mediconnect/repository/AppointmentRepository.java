@@ -12,4 +12,10 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
 
     List<Appointment> findTop5ByOrderByCreatedAtDesc();
 
+    boolean existsByDoctorNameAndAppointmentDateAndAppointmentTime(
+            String doctorName,
+            String appointmentDate,
+            String appointmentTime
+    );
+
 }

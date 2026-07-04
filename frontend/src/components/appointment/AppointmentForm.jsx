@@ -1,15 +1,17 @@
 import { useState, useEffect } from "react";
+
 import Button from "../common/Button";
 import Input from "../common/Input";
 
 const AppointmentForm = ({ onSubmit, editingAppointment }) => {
 
     const [formData, setFormData] = useState({
+
         patientName: "",
-        doctorName: "",
+        problem: "",
         appointmentDate: "",
-        appointmentTime: "",
-        status: ""
+        appointmentTime: ""
+
     });
 
     useEffect(() => {
@@ -19,14 +21,20 @@ const AppointmentForm = ({ onSubmit, editingAppointment }) => {
             setFormData({
 
                 patientName: editingAppointment.patientName || "",
-
-                doctorName: editingAppointment.doctorName || "",
-
+                problem: editingAppointment.problem || "",
                 appointmentDate: editingAppointment.appointmentDate || "",
+                appointmentTime: editingAppointment.appointmentTime || ""
 
-                appointmentTime: editingAppointment.appointmentTime || "",
+            });
 
-                status: editingAppointment.status || ""
+        } else {
+
+            setFormData({
+
+                patientName: "",
+                problem: "",
+                appointmentDate: "",
+                appointmentTime: ""
 
             });
 
@@ -39,8 +47,10 @@ const AppointmentForm = ({ onSubmit, editingAppointment }) => {
         const { name, value } = e.target;
 
         setFormData((prev) => ({
+
             ...prev,
             [name]: value
+
         }));
 
     };
@@ -51,13 +61,18 @@ const AppointmentForm = ({ onSubmit, editingAppointment }) => {
 
         onSubmit(formData);
 
-        setFormData({
-            patientName: "",
-            doctorName: "",
-            appointmentDate: "",
-            appointmentTime: "",
-            status: ""
-        });
+        if (!editingAppointment) {
+
+            setFormData({
+
+                patientName: "",
+                problem: "",
+                appointmentDate: "",
+                appointmentTime: ""
+
+            });
+
+        }
 
     };
 
@@ -65,14 +80,16 @@ const AppointmentForm = ({ onSubmit, editingAppointment }) => {
 
         <form
             onSubmit={handleSubmit}
-            className="bg-white rounded-xl shadow p-6 mb-8"
+            className="bg-white rounded-xl shadow-md p-6 mb-8"
         >
 
-            <h2 className="text-2xl font-semibold mb-5">
+            <h2 className="text-2xl font-semibold mb-6">
+
                 Appointment Details
+
             </h2>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
                 <Input
                     name="patientName"
@@ -83,14 +100,79 @@ const AppointmentForm = ({ onSubmit, editingAppointment }) => {
                     required
                 />
 
-                <Input
-                    name="doctorName"
-                    type="text"
-                    placeholder="Doctor Name"
-                    value={formData.doctorName}
+                <select
+                    name="problem"
+                    value={formData.problem}
                     onChange={handleChange}
                     required
-                />
+                    className="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+
+                    <option value="">
+                        Select Problem
+                    </option>
+
+                    <option value="Chest Pain">
+                        Chest Pain
+                    </option>
+
+                    <option value="Heart Problem">
+                        Heart Problem
+                    </option>
+
+                    <option value="High BP">
+                        High BP
+                    </option>
+
+                    <option value="Headache">
+                        Headache
+                    </option>
+
+                    <option value="Migraine">
+                        Migraine
+                    </option>
+
+                    <option value="Skin Allergy">
+                        Skin Allergy
+                    </option>
+
+                    <option value="Acne">
+                        Acne
+                    </option>
+
+                    <option value="Fever">
+                        Fever
+                    </option>
+
+                    <option value="Cold">
+                        Cold
+                    </option>
+
+                    <option value="Cough">
+                        Cough
+                    </option>
+
+                    <option value="Bone Fracture">
+                        Bone Fracture
+                    </option>
+
+                    <option value="Back Pain">
+                        Back Pain
+                    </option>
+
+                    <option value="Eye Pain">
+                        Eye Pain
+                    </option>
+
+                    <option value="Vision Problem">
+                        Vision Problem
+                    </option>
+
+                    <option value="Pregnancy">
+                        Pregnancy
+                    </option>
+
+                </select>
 
                 <Input
                     name="appointmentDate"
@@ -108,23 +190,16 @@ const AppointmentForm = ({ onSubmit, editingAppointment }) => {
                     required
                 />
 
-                <Input
-                    name="status"
-                    type="text"
-                    placeholder="Status"
-                    value={formData.status}
-                    onChange={handleChange}
-                    required
-                />
-
             </div>
 
             <div className="mt-6">
 
                 <Button type="submit">
+
                     {editingAppointment
                         ? "Update Appointment"
                         : "Book Appointment"}
+
                 </Button>
 
             </div>

@@ -1,11 +1,15 @@
 package com.devang.mediconnect.service.impl;
 
+import java.time.Month;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
 import com.devang.mediconnect.dto.DashboardResponse;
+import com.devang.mediconnect.entity.Patient;
 import com.devang.mediconnect.repository.AppointmentRepository;
 import com.devang.mediconnect.repository.DoctorRepository;
 import com.devang.mediconnect.repository.PatientRepository;
@@ -46,7 +50,50 @@ public class DashboardServiceImpl implements DashboardService {
                 response.setRecentAppointments(
                         appointmentRepository.findTop5ByOrderByCreatedAtDesc());
 
+                response.setPendingAppointments(
+                        appointmentRepository.countByStatusIgnoreCase("Pending"));
+
+                response.setCompletedAppointments(
+                        appointmentRepository.countByStatusIgnoreCase("Completed"));
+
+                response.setCancelledAppointments(
+                        appointmentRepository.countByStatusIgnoreCase("Cancelled"));
+
                 return response;
+        }
+
+        @Override
+        public Map<String, Long> getPatientGrowth() {
+
+                List<Patient> patients = patientRepository.findAllByOrderByCreatedAtAsc();
+
+                Map<String, Long> growth = new LinkedHashMap<>();
+
+                for (Month month : Month.values()) {
+
+                growth.put(month.name().substring(0, 3), 0L);
+
+                }
+
+                for (Patient patient : patients) {
+
+                if (patient.getCreatedAt() != null) {
+
+                        String month = patient.getCreatedAt()
+                                .getMonth()
+                                .name()
+                                .substring(0, 3);
+
+                        growth.put(
+                                month,
+                                growth.get(month) + 1
+                        );
+
+                }
+
+                }
+
+                return growth;
         }
 
         @Override
@@ -68,4 +115,24 @@ public class DashboardServiceImpl implements DashboardService {
 
                 return status;
         }
+
+        @Override
+        public Map<String, Long> getDoctorSpecializationStats() {
+
+                Map<String, Long> stats = new LinkedHashMap<>();
+
+                List<Object[]> result = doctorRepository.countDoctorsBySpecialization();
+
+                for (Object[] row : result) {
+
+                stats.put(
+                        (String) row[0],
+                        (Long) row[1]
+                );
+
+                }
+
+                return stats;
+        }
+
 }

@@ -1,26 +1,15 @@
+import { useEffect, useState } from "react";
+
 import {
     PieChart,
     Pie,
     Cell,
     Tooltip,
-    Legend,
-    ResponsiveContainer
+    ResponsiveContainer,
+    Legend
 } from "recharts";
 
-const data = [
-    {
-        name: "Completed",
-        value: 12
-    },
-    {
-        name: "Pending",
-        value: 4
-    },
-    {
-        name: "Cancelled",
-        value: 2
-    }
-];
+import api from "../../services/api";
 
 const COLORS = [
     "#22c55e",
@@ -30,14 +19,52 @@ const COLORS = [
 
 const AppointmentPieChart = () => {
 
+    const [data, setData] = useState([]);
+
+    const fetchAppointmentStatus = async () => {
+
+        try {
+
+            const response = await api.get(
+                "/dashboard/appointment-status"
+            );
+
+            setData([
+                {
+                    name: "Completed",
+                    value: response.data.completed
+                },
+                {
+                    name: "Pending",
+                    value: response.data.pending
+                },
+                {
+                    name: "Cancelled",
+                    value: response.data.cancelled
+                }
+            ]);
+
+        } catch (error) {
+
+            console.error(error);
+
+        }
+
+    };
+    
+    useEffect(() => {
+
+        fetchAppointmentStatus();
+
+    }, []);
+
+
     return (
 
         <div className="bg-white rounded-2xl shadow-md p-6">
 
             <h2 className="text-2xl font-semibold mb-6">
-
                 Appointment Status
-
             </h2>
 
             <ResponsiveContainer
@@ -50,7 +77,6 @@ const AppointmentPieChart = () => {
                     <Pie
                         data={data}
                         dataKey="value"
-                        nameKey="name"
                         outerRadius={100}
                         label
                     >

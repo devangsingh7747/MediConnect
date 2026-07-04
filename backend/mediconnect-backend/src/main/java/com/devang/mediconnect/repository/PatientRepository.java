@@ -9,5 +9,7 @@ import com.devang.mediconnect.entity.Patient;
 public interface PatientRepository extends JpaRepository<Patient, Long> {
 
     List<Patient> findTop5ByOrderByCreatedAtDesc();
+    
+    List<Patient> findAllByOrderByCreatedAtAsc();
 
 }

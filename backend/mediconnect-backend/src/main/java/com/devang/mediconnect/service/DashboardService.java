@@ -10,4 +10,8 @@ public interface DashboardService {
 
     Map<String, Long> getAppointmentStatus();
 
+    Map<String, Long> getPatientGrowth();
+
+    Map<String, Long> getDoctorSpecializationStats();
+
 }

@@ -39,6 +39,8 @@ const AppointmentDashboard = () => {
 
             } else {
 
+                console.log("Sending Appointment:", appointment);
+
                 await api.post("/appointments", appointment);
 
             }
@@ -49,7 +51,23 @@ const AppointmentDashboard = () => {
 
             console.error(error);
 
-            alert("Operation failed.");
+            let message = "Operation failed.";
+
+            if (error.response) {
+
+                if (typeof error.response.data === "string") {
+
+                    message = error.response.data;
+
+                } else if (error.response.data?.message) {
+
+                    message = error.response.data.message;
+
+                }
+
+            }
+
+            alert(message);
 
         }
 
@@ -86,13 +104,22 @@ const AppointmentDashboard = () => {
     }, [fetchAppointments]);
 
     return (
+
         <Layout>
 
             <div className="p-6">
 
-                <h1 className="text-3xl font-bold mb-6">
+                <h1 className="text-4xl font-bold text-gray-800 mb-2">
+
                     Appointment Dashboard
+
                 </h1>
+
+                <p className="text-gray-500 mb-8">
+
+                    Book appointments and let MediConnect automatically assign the most suitable doctor.
+
+                </p>
 
                 <AppointmentForm
                     onSubmit={saveAppointment}
@@ -102,13 +129,17 @@ const AppointmentDashboard = () => {
                 <div className="bg-white rounded-xl shadow p-6">
 
                     <h2 className="text-xl font-semibold mb-4">
+
                         Appointments
+
                     </h2>
 
                     {appointments.length === 0 ? (
 
                         <p className="text-gray-500">
+
                             No appointments found.
+
                         </p>
 
                     ) : (
@@ -120,17 +151,12 @@ const AppointmentDashboard = () => {
                                 <tr className="bg-gray-100">
 
                                     <th className="border p-3">ID</th>
-
                                     <th className="border p-3">Patient</th>
-
-                                    <th className="border p-3">Doctor</th>
-
+                                    <th className="border p-3">Problem</th>
+                                    <th className="border p-3">Assigned Doctor</th>
                                     <th className="border p-3">Date</th>
-
                                     <th className="border p-3">Time</th>
-
                                     <th className="border p-3">Status</th>
-
                                     <th className="border p-3">Actions</th>
 
                                 </tr>
@@ -147,27 +173,63 @@ const AppointmentDashboard = () => {
                                     >
 
                                         <td className="border p-3">
+
                                             {appointment.id}
+
                                         </td>
 
                                         <td className="border p-3">
+
                                             {appointment.patientName}
+
                                         </td>
 
                                         <td className="border p-3">
-                                            {appointment.doctorName}
+
+                                            {appointment.problem}
+
+                                        </td>
+
+                                        <td className="border p-3 font-medium text-blue-600">
+
+                                            Dr. {appointment.doctorName}
+
                                         </td>
 
                                         <td className="border p-3">
+
                                             {appointment.appointmentDate}
+
                                         </td>
 
                                         <td className="border p-3">
+
                                             {appointment.appointmentTime}
+
                                         </td>
 
                                         <td className="border p-3">
-                                            {appointment.status}
+
+                                            <span
+                                                className={`
+                                                    px-3
+                                                    py-1
+                                                    rounded-full
+                                                    text-white
+                                                    text-sm
+
+                                                    ${appointment.status === "Completed"
+                                                        ? "bg-green-500"
+                                                        : appointment.status === "Cancelled"
+                                                        ? "bg-red-500"
+                                                        : "bg-yellow-500"}
+                                                `}
+                                            >
+
+                                                {appointment.status}
+
+                                            </span>
+
                                         </td>
 
                                         <td className="border p-3">
@@ -180,7 +242,9 @@ const AppointmentDashboard = () => {
                                                     }
                                                     className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded-lg transition"
                                                 >
+
                                                     Edit
+
                                                 </button>
 
                                                 <button
@@ -189,7 +253,9 @@ const AppointmentDashboard = () => {
                                                     }
                                                     className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-lg transition"
                                                 >
+
                                                     Delete
+
                                                 </button>
 
                                             </div>

@@ -14,6 +14,12 @@ public class DashboardResponse {
 
     private Long appointmentCount;
 
+    private Long pendingAppointments;
+
+    private Long completedAppointments;
+
+    private Long cancelledAppointments;
+
     private List<Patient> recentPatients;
 
     private List<Doctor> recentDoctors;
@@ -45,6 +51,30 @@ public class DashboardResponse {
 
     public void setAppointmentCount(Long appointmentCount) {
         this.appointmentCount = appointmentCount;
+    }
+
+    public Long getPendingAppointments() {
+        return pendingAppointments;
+    }
+
+    public void setPendingAppointments(Long pendingAppointments) {
+        this.pendingAppointments = pendingAppointments;
+    }
+
+    public Long getCompletedAppointments() {
+        return completedAppointments;
+    }
+
+    public void setCompletedAppointments(Long completedAppointments) {
+        this.completedAppointments = completedAppointments;
+    }
+
+    public Long getCancelledAppointments() {
+        return cancelledAppointments;
+    }
+
+    public void setCancelledAppointments(Long cancelledAppointments) {
+        this.cancelledAppointments = cancelledAppointments;
     }
 
     public List<Patient> getRecentPatients() {
