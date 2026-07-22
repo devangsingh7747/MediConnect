@@ -1,7 +1,9 @@
 package com.devang.mediconnect.controller;
 
 import java.security.Principal;
+import java.util.Map;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -11,6 +13,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.devang.mediconnect.dto.LoginRequest;
 import com.devang.mediconnect.dto.LoginResponse;
+import com.devang.mediconnect.dto.RegistrationOtpRequest;
+import com.devang.mediconnect.dto.VerifyRegistrationOtpRequest;
 import com.devang.mediconnect.entity.User;
 import com.devang.mediconnect.service.UserService;
 
@@ -20,51 +24,93 @@ public class UserController {
 
     private final UserService userService;
 
-    public UserController(UserService userService) {
-        this.userService = userService;
+    public UserController(
+            UserService userService) {
+
+        this.userService =
+                userService;
     }
 
+    /*
+     * Direct public registration is disabled.
+     * Registration must be completed using email OTP.
+     */
     @PostMapping("/register")
-    public User registerUser(@RequestBody User user) {
+    public ResponseEntity<Map<String, String>>
+            registerUser() {
 
-        System.out.println("REGISTER API HIT");
-        System.out.println(user.getEmail());
+        throw new RuntimeException(
+                "Email OTP verification is required before registration."
+        );
+    }
 
-        return userService.registerUser(user);
+    @PostMapping("/register/send-otp")
+    public ResponseEntity<Map<String, String>>
+            sendRegistrationOtp(
+                    @RequestBody
+                    RegistrationOtpRequest request) {
+
+        userService.sendRegistrationOtp(
+                request.getEmail()
+        );
+
+        return ResponseEntity.ok(
+                Map.of(
+                        "message",
+                        "A 6-digit OTP has been sent to your email address."
+                )
+        );
+    }
+
+    @PostMapping("/register/verify-otp")
+    public ResponseEntity<User>
+            verifyRegistrationOtp(
+                    @RequestBody
+                    VerifyRegistrationOtpRequest request) {
+
+        User registeredUser =
+                userService
+                        .verifyRegistrationOtp(
+                                request
+                        );
+
+        return ResponseEntity.ok(
+                registeredUser
+        );
     }
 
     @PostMapping("/login")
-    public LoginResponse loginUser(@RequestBody LoginRequest loginRequest) {
+    public LoginResponse loginUser(
+            @RequestBody
+            LoginRequest loginRequest) {
 
-        try {
+        String token =
+                userService.loginUser(
+                        loginRequest.getEmail(),
+                        loginRequest.getPassword()
+                );
 
-            System.out.println("LOGIN API HIT");
-            System.out.println(loginRequest.getEmail());
-
-            String token = userService.loginUser(
-                    loginRequest.getEmail(),
-                    loginRequest.getPassword());
-
-            return new LoginResponse(token);
-
-        } catch (Exception e) {
-
-            e.printStackTrace();
-
-            throw e;
-        }
+        return new LoginResponse(
+                token
+        );
     }
 
     @GetMapping("/me")
-    public User getCurrentUser(Principal principal) {
+    public User getCurrentUser(
+            Principal principal) {
 
-        return userService.getUserByEmail(principal.getName());
-
+        return userService.getUserByEmail(
+                principal.getName()
+        );
     }
 
     @GetMapping("/{email}")
-    public User getUserByEmail(@PathVariable String email) {
-        return userService.getUserByEmail(email);
-    }
+    public User getUserByEmail(
+            @PathVariable
+            String email) {
 
+        return userService.getUserByEmail(
+                email
+        );
+    }
 }
