@@ -59,11 +59,12 @@ public class SecurityConfig {
                                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                         )
                         .authorizeHttpRequests(auth -> auth .requestMatchers(
-                                "/api/users/**",
-                                "/api/patients/**",
-                                "/api/doctors/**",
-                                "/api/appointments/**",
-                                "/api/dashboard/**"
+                                        "/api/users/**",
+                                        "/api/patients/**",
+                                        "/api/doctors/**",
+                                        "/api/appointments/**",
+                                        "/api/dashboard/**",
+                                        "/api/notifications/**"
                                 ).permitAll()
                                 .anyRequest().authenticated()
                         )

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FaUserPlus } from "react-icons/fa";
+
 import api from "../../services/api";
 import Input from "../common/Input";
 import Button from "../common/Button";
@@ -10,9 +11,12 @@ const RegisterForm = () => {
     const navigate = useNavigate();
 
     const [formData, setFormData] = useState({
+
         fullName: "",
         email: "",
-        password: ""
+        password: "",
+        role: "PATIENT"
+
     });
 
     const handleChange = (e) => {
@@ -20,8 +24,10 @@ const RegisterForm = () => {
         const { name, value } = e.target;
 
         setFormData((prev) => ({
+
             ...prev,
             [name]: value
+
         }));
 
     };
@@ -38,14 +44,22 @@ const RegisterForm = () => {
 
             navigate("/");
 
-        } catch (error) {
+        }
+
+        catch (error) {
 
             console.error(error);
 
             if (error.response?.status === 409) {
+
                 alert("Email already registered.");
-            } else {
+
+            }
+
+            else {
+
                 alert("Registration Failed!");
+
             }
 
         }
@@ -106,6 +120,37 @@ const RegisterForm = () => {
                     required
                 />
 
+                <div>
+
+                    <label className="block mb-2 font-semibold text-gray-700">
+
+                        Register As
+
+                    </label>
+
+                    <select
+                        name="role"
+                        value={formData.role}
+                        onChange={handleChange}
+                        className="w-full border rounded-lg px-3 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+
+                        <option value="PATIENT">
+
+                            👤 Patient
+
+                        </option>
+
+                        <option value="DOCTOR">
+
+                            👨‍⚕️ Doctor
+
+                        </option>
+
+                    </select>
+
+                </div>
+
                 <Button type="submit">
 
                     Register
@@ -122,7 +167,9 @@ const RegisterForm = () => {
                     to="/"
                     className="text-blue-600 font-semibold"
                 >
+
                     Login
+
                 </Link>
 
             </p>

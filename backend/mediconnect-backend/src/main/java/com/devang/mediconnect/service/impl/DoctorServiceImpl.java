@@ -58,4 +58,54 @@ public class DoctorServiceImpl implements DoctorService {
         doctorRepository.deleteById(id);
     }
 
+    @Override
+    public Doctor getDoctorByEmail(String email) {
+
+        return doctorRepository
+                .findByEmailIgnoreCase(email)
+                .orElse(null);
+
+    }
+
+    @Override
+    public Doctor updateAvailability(
+            String email,
+            String availability) {
+
+        Doctor doctor =
+                doctorRepository
+                        .findByEmailIgnoreCase(email)
+                        .orElse(null);
+
+        if (doctor == null) {
+
+            return null;
+
+        }
+
+        String normalizedAvailability =
+                availability == null
+                        ? "UNAVAILABLE"
+                        : availability
+                                .replace("\"", "")
+                                .trim()
+                                .toUpperCase();
+
+        if (
+                !"AVAILABLE".equals(normalizedAvailability)
+                && !"UNAVAILABLE".equals(normalizedAvailability)
+        ) {
+
+            normalizedAvailability = "UNAVAILABLE";
+
+        }
+
+        doctor.setAvailability(
+                normalizedAvailability
+        );
+
+        return doctorRepository.save(doctor);
+
+    }
+
 }

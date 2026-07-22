@@ -12,6 +12,8 @@ import {
     FaClipboardList
 } from "react-icons/fa";
 
+import Loader from "../components/common/Loader";
+
 import api from "../services/api";
 import Layout from "../components/layout/Layout";
 import StatsCard from "../components/dashboard/StatsCard";
@@ -23,6 +25,7 @@ const HomeDashboard = () => {
     const user = JSON.parse(localStorage.getItem("user") || "{}");
 
     const [patientCount, setPatientCount] = useState(0);
+    const [loading, setLoading] = useState(true);
     const [doctorCount, setDoctorCount] = useState(0);
     const [appointmentCount, setAppointmentCount] = useState(0);
 
@@ -37,6 +40,8 @@ const HomeDashboard = () => {
     const fetchDashboardData = async () => {
 
         try {
+
+            setLoading(true);
 
             console.log("Fetching dashboard...");
 
@@ -62,6 +67,10 @@ const HomeDashboard = () => {
 
             console.error("Dashboard Error:", error);
 
+        } finally {
+
+            setLoading(false);
+
         }
 
     };
@@ -85,6 +94,19 @@ const HomeDashboard = () => {
         greeting = "Good Afternoon";
 
     }
+
+
+    if (loading) {
+
+        return (
+            <Layout>
+                <Loader />
+            </Layout>
+        );
+
+    }
+
+
 
     return (
 

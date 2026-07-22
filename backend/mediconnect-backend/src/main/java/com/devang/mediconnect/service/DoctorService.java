@@ -14,6 +14,13 @@ public interface DoctorService {
 
     Doctor updateDoctor(Long id, Doctor doctor);
 
+    Doctor getDoctorByEmail(String email);
+
+    Doctor updateAvailability(
+        String email,
+        String availability
+    );
+
     void deleteDoctor(Long id);
 
 }

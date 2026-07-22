@@ -47,6 +47,15 @@ public class AppointmentController {
 
     }
 
+    @GetMapping("/doctor/{email}")
+    public List<Appointment> getDoctorAppointments(
+            @PathVariable String email) {
+
+        return appointmentService
+                .getAppointmentsByDoctorEmail(email);
+
+    }
+
     @PutMapping("/{id}")
     public Appointment updateAppointment(
             @PathVariable Long id,
@@ -75,6 +84,42 @@ public class AppointmentController {
 
         return ResponseEntity.noContent().build();
 
+    }
+
+    @PutMapping("/{id}/accept")
+    public ResponseEntity<Appointment> acceptAppointment(
+            @PathVariable Long id) {
+
+        Appointment updatedAppointment =
+                appointmentService.acceptAppointment(id);
+
+        return ResponseEntity.ok(
+                updatedAppointment
+        );
+    }
+
+    @PutMapping("/{id}/reject")
+    public ResponseEntity<Appointment> rejectAppointment(
+            @PathVariable Long id) {
+
+        Appointment updatedAppointment =
+                appointmentService.rejectAppointment(id);
+
+        return ResponseEntity.ok(
+                updatedAppointment
+        );
+    }
+
+    @PutMapping("/{id}/complete")
+    public ResponseEntity<Appointment> completeAppointment(
+            @PathVariable Long id) {
+
+        Appointment updatedAppointment =
+                appointmentService.completeAppointment(id);
+
+        return ResponseEntity.ok(
+                updatedAppointment
+        );
     }
 
 }

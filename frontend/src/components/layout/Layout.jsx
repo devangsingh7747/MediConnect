@@ -1,4 +1,5 @@
 import Sidebar from "./Sidebar";
+import Header from "./Header";
 
 const Layout = ({ children }) => {
 
@@ -11,7 +12,10 @@ const Layout = ({ children }) => {
             </div>
 
             <main className="ml-64 p-8">
+
+                <Header />
                 {children}
+                
             </main>
 
         </div>

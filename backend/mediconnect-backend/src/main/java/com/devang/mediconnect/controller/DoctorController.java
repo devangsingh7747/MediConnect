@@ -21,34 +21,112 @@ public class DoctorController {
 
     private final DoctorService doctorService;
 
-    public DoctorController(DoctorService doctorService) {
+    public DoctorController(
+            DoctorService doctorService) {
+
         this.doctorService = doctorService;
+
     }
 
     @PostMapping
-    public Doctor saveDoctor(@RequestBody Doctor doctor) {
+    public Doctor saveDoctor(
+            @RequestBody Doctor doctor) {
+
         return doctorService.saveDoctor(doctor);
+
     }
 
     @GetMapping
     public List<Doctor> getAllDoctors() {
+
         return doctorService.getAllDoctors();
+
     }
 
     @GetMapping("/{id}")
-    public Doctor getDoctorById(@PathVariable Long id) {
-        return doctorService.getDoctorById(id);
+    public ResponseEntity<Doctor> getDoctorById(
+            @PathVariable Long id) {
+
+        Doctor doctor =
+                doctorService.getDoctorById(id);
+
+        if (doctor == null) {
+
+            return ResponseEntity.notFound().build();
+
+        }
+
+        return ResponseEntity.ok(doctor);
+
+    }
+
+    @GetMapping("/email/{email}")
+    public ResponseEntity<Doctor> getDoctorByEmail(
+            @PathVariable String email) {
+
+        Doctor doctor =
+                doctorService.getDoctorByEmail(email);
+
+        if (doctor == null) {
+
+            return ResponseEntity.notFound().build();
+
+        }
+
+        return ResponseEntity.ok(doctor);
+
     }
 
     @PutMapping("/{id}")
-    public Doctor updateDoctor(@PathVariable Long id, @RequestBody Doctor doctor) {
-        return doctorService.updateDoctor(id, doctor);
+    public ResponseEntity<Doctor> updateDoctor(
+            @PathVariable Long id,
+            @RequestBody Doctor doctor) {
+
+        Doctor updatedDoctor =
+                doctorService.updateDoctor(
+                        id,
+                        doctor
+                );
+
+        if (updatedDoctor == null) {
+
+            return ResponseEntity.notFound().build();
+
+        }
+
+        return ResponseEntity.ok(updatedDoctor);
+
+    }
+
+    @PutMapping("/email/{email}/availability")
+    public ResponseEntity<Doctor> updateAvailability(
+            @PathVariable String email,
+            @RequestBody String availability) {
+
+        Doctor updatedDoctor =
+                doctorService.updateAvailability(
+                        email,
+                        availability
+                );
+
+        if (updatedDoctor == null) {
+
+            return ResponseEntity.notFound().build();
+
+        }
+
+        return ResponseEntity.ok(updatedDoctor);
+
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteDoctor(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteDoctor(
+            @PathVariable Long id) {
+
         doctorService.deleteDoctor(id);
+
         return ResponseEntity.noContent().build();
+
     }
 
 }

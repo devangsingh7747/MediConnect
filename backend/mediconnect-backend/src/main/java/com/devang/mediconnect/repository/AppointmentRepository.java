@@ -12,10 +12,33 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
 
     List<Appointment> findTop5ByOrderByCreatedAtDesc();
 
+    List<Appointment> findByDoctorNameOrderByAppointmentDateAscAppointmentTimeAsc(
+        String doctorName
+    );
+
+    List<Appointment>
+    findByDoctorEmailIgnoreCaseOrderByAppointmentDateAscAppointmentTimeAsc(
+            String doctorEmail
+    );
+
+    long countByDoctorName(
+        String doctorName
+    );
+
+    long countByDoctorNameAndStatus(
+        String doctorName,
+        String status
+    );
+
+    long countByDoctorNameAndAppointmentDate(
+        String doctorName,
+        String appointmentDate
+    );
+
     boolean existsByDoctorNameAndAppointmentDateAndAppointmentTime(
-            String doctorName,
-            String appointmentDate,
-            String appointmentTime
+        String doctorName,
+        String appointmentDate,
+        String appointmentTime
     );
 
 }

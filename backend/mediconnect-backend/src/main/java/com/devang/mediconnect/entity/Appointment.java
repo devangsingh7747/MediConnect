@@ -19,9 +19,21 @@ public class Appointment {
 
     private String patientName;
 
+    private String patientEmail;
+
     private String problem;
 
     private String doctorName;
+
+    /*
+     * Stores the assigned doctor's email.
+     *
+     * This lets us:
+     * - Fetch appointments reliably by doctor email
+     * - Create doctor-specific notifications
+     * - Avoid depending only on doctor names
+     */
+    private String doctorEmail;
 
     private String appointmentDate;
 
@@ -39,16 +51,20 @@ public class Appointment {
     public Appointment(
             Long id,
             String patientName,
+            String patientEmail,
             String problem,
             String doctorName,
+            String doctorEmail,
             String appointmentDate,
             String appointmentTime,
             String status) {
 
         this.id = id;
         this.patientName = patientName;
+        this.patientEmail = patientEmail;
         this.problem = problem;
         this.doctorName = doctorName;
+        this.doctorEmail = doctorEmail;
         this.appointmentDate = appointmentDate;
         this.appointmentTime = appointmentTime;
         this.status = status;
@@ -70,6 +86,14 @@ public class Appointment {
         this.patientName = patientName;
     }
 
+    public String getPatientEmail() {
+        return patientEmail;
+    }
+
+    public void setPatientEmail(String patientEmail) {
+        this.patientEmail = patientEmail;
+    }
+
     public String getProblem() {
         return problem;
     }
@@ -86,11 +110,21 @@ public class Appointment {
         this.doctorName = doctorName;
     }
 
+    public String getDoctorEmail() {
+        return doctorEmail;
+    }
+
+    public void setDoctorEmail(String doctorEmail) {
+        this.doctorEmail = doctorEmail;
+    }
+
     public String getAppointmentDate() {
         return appointmentDate;
     }
 
-    public void setAppointmentDate(String appointmentDate) {
+    public void setAppointmentDate(
+            String appointmentDate) {
+
         this.appointmentDate = appointmentDate;
     }
 
@@ -98,7 +132,9 @@ public class Appointment {
         return appointmentTime;
     }
 
-    public void setAppointmentTime(String appointmentTime) {
+    public void setAppointmentTime(
+            String appointmentTime) {
+
         this.appointmentTime = appointmentTime;
     }
 
@@ -114,8 +150,9 @@ public class Appointment {
         return createdAt;
     }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
+    public void setCreatedAt(
+            LocalDateTime createdAt) {
+
         this.createdAt = createdAt;
     }
-
 }

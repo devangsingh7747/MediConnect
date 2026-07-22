@@ -8,6 +8,7 @@ const AppointmentForm = ({ onSubmit, editingAppointment }) => {
     const [formData, setFormData] = useState({
 
         patientName: "",
+        patientEmail: "",
         problem: "",
         appointmentDate: "",
         appointmentTime: ""
@@ -21,6 +22,7 @@ const AppointmentForm = ({ onSubmit, editingAppointment }) => {
             setFormData({
 
                 patientName: editingAppointment.patientName || "",
+                patientEmail: editingAppointment.patientEmail || "",
                 problem: editingAppointment.problem || "",
                 appointmentDate: editingAppointment.appointmentDate || "",
                 appointmentTime: editingAppointment.appointmentTime || ""
@@ -32,6 +34,7 @@ const AppointmentForm = ({ onSubmit, editingAppointment }) => {
             setFormData({
 
                 patientName: "",
+                patientEmail: "",
                 problem: "",
                 appointmentDate: "",
                 appointmentTime: ""
@@ -66,6 +69,7 @@ const AppointmentForm = ({ onSubmit, editingAppointment }) => {
             setFormData({
 
                 patientName: "",
+                patientEmail: "",
                 problem: "",
                 appointmentDate: "",
                 appointmentTime: ""
@@ -96,6 +100,15 @@ const AppointmentForm = ({ onSubmit, editingAppointment }) => {
                     type="text"
                     placeholder="Patient Name"
                     value={formData.patientName}
+                    onChange={handleChange}
+                    required
+                />
+
+                <Input
+                    name="patientEmail"
+                    type="email"
+                    placeholder="Patient Email"
+                    value={formData.patientEmail}
                     onChange={handleChange}
                     required
                 />

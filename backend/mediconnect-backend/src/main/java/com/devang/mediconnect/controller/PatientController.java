@@ -21,35 +21,112 @@ public class PatientController {
 
     private final PatientService patientService;
 
-    public PatientController(PatientService patientService) {
+    public PatientController(
+            PatientService patientService) {
+
         this.patientService = patientService;
+
     }
 
     @PostMapping
-    public Patient savePatient(@RequestBody Patient patient) {
+    public Patient savePatient(
+            @RequestBody Patient patient) {
+
         return patientService.savePatient(patient);
+
     }
 
     @GetMapping
     public List<Patient> getAllPatients() {
+
         return patientService.getAllPatients();
+
     }
 
     @GetMapping("/{id}")
-    public Patient getPatientById(@PathVariable Long id) {
-        return patientService.getPatientById(id);
+    public ResponseEntity<Patient> getPatientById(
+            @PathVariable Long id) {
+
+        Patient patient =
+                patientService.getPatientById(id);
+
+        if (patient == null) {
+
+            return ResponseEntity.notFound().build();
+
+        }
+
+        return ResponseEntity.ok(patient);
+
+    }
+
+    @GetMapping("/email/{email}")
+    public ResponseEntity<Patient> getPatientByEmail(
+            @PathVariable String email) {
+
+        Patient patient =
+                patientService.getPatientByEmail(email);
+
+        if (patient == null) {
+
+            return ResponseEntity.notFound().build();
+
+        }
+
+        return ResponseEntity.ok(patient);
+
     }
 
     @PutMapping("/{id}")
-    public Patient updatePatient(@PathVariable Long id, @RequestBody Patient patient) {
-        return patientService.updatePatient(id, patient);
+    public ResponseEntity<Patient> updatePatient(
+            @PathVariable Long id,
+            @RequestBody Patient patient) {
+
+        Patient updatedPatient =
+                patientService.updatePatient(
+                        id,
+                        patient
+                );
+
+        if (updatedPatient == null) {
+
+            return ResponseEntity.notFound().build();
+
+        }
+
+        return ResponseEntity.ok(updatedPatient);
+
+    }
+
+    @PutMapping("/email/{email}")
+    public ResponseEntity<Patient> updatePatientByEmail(
+            @PathVariable String email,
+            @RequestBody Patient patient) {
+
+        Patient updatedPatient =
+                patientService.updatePatientByEmail(
+                        email,
+                        patient
+                );
+
+        if (updatedPatient == null) {
+
+            return ResponseEntity.notFound().build();
+
+        }
+
+        return ResponseEntity.ok(updatedPatient);
+
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletePatient(@PathVariable Long id) {
+    public ResponseEntity<Void> deletePatient(
+            @PathVariable Long id) {
 
         patientService.deletePatient(id);
 
         return ResponseEntity.noContent().build();
+
     }
+
 }

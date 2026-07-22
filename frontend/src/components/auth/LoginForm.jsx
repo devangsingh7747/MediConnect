@@ -1,24 +1,28 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { FaUserDoctor } from "react-icons/fa6";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 import Input from "../common/Input";
 import Button from "../common/Button";
-
-import { useNavigate } from "react-router-dom";
 import api from "../../services/api";
 
 const LoginForm = () => {
 
+    const navigate = useNavigate();
+
     const [showPassword, setShowPassword] = useState(false);
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [loading, setLoading] = useState(false);
 
-    const navigate = useNavigate();
+    const handleLogin = async (event) => {
 
-    const handleLogin = async () => {
+        event.preventDefault();
+
         try {
+
+            setLoading(true);
 
             const response = await api.post("/users/login", {
                 email,
@@ -27,46 +31,90 @@ const LoginForm = () => {
 
             localStorage.setItem("token", response.data.token);
 
-            // Fetch logged-in user
             const userResponse = await api.get("/users/me");
+
+            const loggedInUser = userResponse.data;
 
             localStorage.setItem(
                 "user",
-                JSON.stringify(userResponse.data)
+                JSON.stringify(loggedInUser)
             );
 
-            navigate("/home");
+            const normalizedRole = loggedInUser.role
+                ?.replace("ROLE_", "")
+                .toUpperCase();
+
+            if (normalizedRole === "PATIENT") {
+
+                navigate("/patient/home");
+
+            } else if (normalizedRole === "DOCTOR") {
+
+                navigate("/doctor/home");
+
+            } else if (normalizedRole === "ADMIN") {
+
+                navigate("/home");
+
+            } else {
+
+                localStorage.removeItem("token");
+                localStorage.removeItem("user");
+
+                alert("Invalid user role.");
+
+            }
 
         } catch (error) {
 
-            alert("Invalid email or password");
+            console.error("Login failed:", error);
 
-            console.error(error);
+            localStorage.removeItem("token");
+            localStorage.removeItem("user");
+
+            alert("Invalid email or password.");
+
+        } finally {
+
+            setLoading(false);
+
         }
+
     };
 
     return (
+
         <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md">
 
             <div className="flex justify-center mb-4">
+
                 <FaUserDoctor className="text-5xl text-blue-600" />
+
             </div>
 
             <h1 className="text-3xl font-bold text-center text-gray-800">
+
                 MediConnect
+
             </h1>
 
             <p className="text-center text-gray-500 mt-2 mb-8">
+
                 Sign in to continue
+
             </p>
 
-            <div className="space-y-5">
+            <form
+                onSubmit={handleLogin}
+                className="space-y-5"
+            >
 
                 <Input
                     type="email"
                     placeholder="Email Address"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={(event) => setEmail(event.target.value)}
+                    required
                 />
 
                 <div className="relative">
@@ -75,44 +123,57 @@ const LoginForm = () => {
                         type={showPassword ? "text" : "password"}
                         placeholder="Password"
                         value={password}
-                        onChange={(e) => setPassword(e.target.value)}
+                        onChange={(event) => setPassword(event.target.value)}
+                        required
                     />
 
                     <button
                         type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500"
-                    >
-                        {
-                            showPassword
-                                ? <FaEyeSlash />
-                                : <FaEye />
+                        onClick={() =>
+                            setShowPassword((previous) => !previous)
                         }
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 cursor-pointer"
+                    >
+
+                        {showPassword
+                            ? <FaEyeSlash />
+                            : <FaEye />
+                        }
+
                     </button>
 
                 </div>
 
-                <Button onClick={handleLogin}>
-                    Login
+                <Button
+                    type="submit"
+                    disabled={loading}
+                >
+
+                    {loading ? "Signing In..." : "Login"}
+
                 </Button>
 
-            </div>
+            </form>
 
             <p className="text-center mt-6 text-gray-600">
 
-                Don't have an account?
+                Don't have an account?{" "}
 
                 <Link
                     to="/register"
-                    className="text-blue-600 font-semibold ml-1 hover:underline"
+                    className="text-blue-600 font-semibold hover:underline"
                 >
+
                     Register
+
                 </Link>
 
             </p>
 
         </div>
+
     );
+
 };
 
 export default LoginForm;

@@ -10,6 +10,22 @@ public interface AppointmentService {
 
     List<Appointment> getAllAppointments();
 
+    List<Appointment> getAppointmentsByDoctorEmail(
+        String doctorEmail
+    );
+
+    Appointment acceptAppointment(
+        Long appointmentId
+    );
+
+    Appointment rejectAppointment(
+        Long appointmentId
+    );
+
+    Appointment completeAppointment(
+        Long appointmentId
+    );
+
     Appointment getAppointmentById(Long id);
 
     Appointment updateAppointment(Long id, Appointment appointment);

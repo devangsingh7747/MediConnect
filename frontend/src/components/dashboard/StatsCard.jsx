@@ -1,3 +1,7 @@
+import CountUp from "react-countup";
+
+console.log("CountUp =", CountUp);
+
 const StatsCard = ({ title, value, icon, color, onClick }) => {
 
     return (
@@ -27,7 +31,9 @@ const StatsCard = ({ title, value, icon, color, onClick }) => {
                 </p>
 
                 <h2 className={`text-4xl font-bold mt-2 ${color}`}>
+
                     {value}
+
                 </h2>
 
                 <p className="text-xs text-green-600 mt-3 font-medium">

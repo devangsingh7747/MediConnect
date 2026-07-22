@@ -2,6 +2,18 @@ import { useEffect, useState, useCallback } from "react";
 import api from "../services/api";
 import AppointmentForm from "../components/appointment/AppointmentForm";
 import Layout from "../components/layout/Layout";
+import { toast } from "react-toastify";
+import { exportAppointmentsToCSV } from "../utils/exportAppointments";
+import Swal from "sweetalert2";
+
+import {
+    exportToPDF,
+    exportToExcel
+} from "../utils/reportUtils";
+
+import EmptyState from "../components/common/EmptyState";
+
+import Loader from "../components/common/Loader";
 
 const AppointmentDashboard = () => {
 
@@ -10,14 +22,18 @@ const AppointmentDashboard = () => {
     const recordsPerPage = 5;
 
     const [appointments, setAppointments] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [editingAppointment, setEditingAppointment] = useState(null);
 
     const [searchTerm, setSearchTerm] = useState("");
     const [statusFilter, setStatusFilter] = useState("All");
+    const [sortBy, setSortBy] = useState("Latest");
 
     const fetchAppointments = useCallback(async () => {
 
         try {
+
+            setLoading(true);
 
             const response = await api.get("/appointments");
 
@@ -27,6 +43,10 @@ const AppointmentDashboard = () => {
 
             console.error("Failed to fetch appointments:", error);
 
+        } finally {
+
+            setLoading(false);
+
         }
 
     }, []);
@@ -35,7 +55,9 @@ const AppointmentDashboard = () => {
 
         try {
 
-            if (editingAppointment) {
+            const isEditing = editingAppointment !== null;
+
+            if (isEditing) {
 
                 await api.put(
                     `/appointments/${editingAppointment.id}`,
@@ -51,6 +73,12 @@ const AppointmentDashboard = () => {
             }
 
             await fetchAppointments();
+
+            toast.success(
+                isEditing
+                    ? "Appointment updated successfully!"
+                    : "Appointment booked successfully!"
+            );
 
         } catch (error) {
 
@@ -72,7 +100,7 @@ const AppointmentDashboard = () => {
 
             }
 
-            alert(message);
+            toast.error(message);
 
         }
 
@@ -88,11 +116,13 @@ const AppointmentDashboard = () => {
 
             await fetchAppointments();
 
+            toast.success(`Appointment ${status.toLowerCase()} successfully!`);
+
         } catch (error) {
 
             console.error(error);
 
-            alert("Failed to update appointment status.");
+            toast.error("Failed to update appointment status.");
 
         }
 
@@ -100,11 +130,18 @@ const AppointmentDashboard = () => {
 
     const deleteAppointment = async (id) => {
 
-        const confirmDelete = window.confirm(
-            "Are you sure you want to delete this appointment?"
-        );
+        const result = await Swal.fire({
+            title: "Delete Appointment?",
+            text: "This action cannot be undone.",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#2563eb",
+            cancelButtonColor: "#6b7280",
+            confirmButtonText: "Yes, Delete",
+            cancelButtonText: "Cancel",
+        });
 
-        if (!confirmDelete) return;
+        if (!result.isConfirmed) return;
 
         try {
 
@@ -112,15 +149,66 @@ const AppointmentDashboard = () => {
 
             await fetchAppointments();
 
+            toast.success("Appointment deleted successfully!");
+
         } catch (error) {
 
             console.error(error);
 
-            alert("Failed to delete appointment.");
+            toast.error("Failed to delete appointment.");
 
         }
 
     };
+
+
+    const handleExportPDF = () => {
+
+        exportToPDF(
+
+            "Appointments Report",
+
+            [
+                "ID",
+                "Patient",
+                "Problem",
+                "Doctor",
+                "Date",
+                "Time",
+                "Status"
+            ],
+
+            sortedAppointments.map(appointment => [
+
+                appointment.id,
+                appointment.patientName,
+                appointment.problem,
+                appointment.doctorName,
+                appointment.appointmentDate,
+                appointment.appointmentTime,
+                appointment.status
+
+            ]),
+
+            "appointments-report"
+
+        );
+
+    };
+
+    const handleExportExcel = () => {
+
+        exportToExcel(
+
+            sortedAppointments,
+
+            "appointments-report"
+
+        );
+
+    };
+
+
 
     useEffect(() => {
 
@@ -147,22 +235,51 @@ const AppointmentDashboard = () => {
 
     });
 
+    const sortedAppointments = [...filteredAppointments].sort((a, b) => {
+
+        switch (sortBy) {
+
+            case "ID Asc":
+                return a.id - b.id;
+
+            case "ID Desc":
+                return b.id - a.id;
+
+            case "Latest":
+                return new Date(b.appointmentDate) - new Date(a.appointmentDate);
+
+            case "Oldest":
+                return new Date(a.appointmentDate) - new Date(b.appointmentDate);
+
+            case "Patient A-Z":
+                return a.patientName.localeCompare(b.patientName);
+
+            case "Patient Z-A":
+                return b.patientName.localeCompare(a.patientName);
+
+            default:
+                return 0;
+
+        }
+
+    });
+
     useEffect(() => {
 
         setCurrentPage(1);
 
-    }, [searchTerm, statusFilter]);
+    }, [searchTerm, statusFilter, sortBy]);
 
     const lastIndex = currentPage * recordsPerPage;
 
     const firstIndex = lastIndex - recordsPerPage;
 
     const currentAppointments =
-        filteredAppointments.slice(firstIndex, lastIndex);
+        sortedAppointments.slice(firstIndex, lastIndex);
 
     const totalPages = Math.max(
         1,
-        Math.ceil(filteredAppointments.length / recordsPerPage)
+        Math.ceil(sortedAppointments.length / recordsPerPage)
     );
 
     const totalAppointments = appointments.length;
@@ -178,6 +295,19 @@ const AppointmentDashboard = () => {
     const cancelledAppointments = appointments.filter(
         (appointment) => appointment.status === "Cancelled"
     ).length;
+
+
+    if (loading) {
+
+        return (
+            <Layout>
+                <Loader />
+            </Layout>
+        );
+
+    }
+
+
 
     return (
 
@@ -254,11 +384,40 @@ const AppointmentDashboard = () => {
 
                         </h2>
 
-                        <span className="text-gray-500">
+                        <div className="flex items-center gap-4">
 
-                            {filteredAppointments.length} Records
+                            <div className="flex items-center gap-3">
 
-                        </span>
+                                <button
+                                    onClick={handleExportPDF}
+                                    className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition"
+                                >
+                                    Export PDF
+                                </button>
+
+                                <button
+                                    onClick={handleExportExcel}
+                                    className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition"
+                                >
+                                    Export Excel
+                                </button>
+
+                                <span className="text-gray-500">
+                                    {sortedAppointments.length} Records
+                                </span>
+
+                            </div>
+
+                            <button
+                                onClick={() => exportAppointmentsToCSV(sortedAppointments)}
+                                className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg transition"
+                            >
+
+                                Export CSV
+
+                            </button>
+
+                        </div>
 
                     </div>
 
@@ -285,15 +444,29 @@ const AppointmentDashboard = () => {
 
                         </select>
 
+                        <select
+                            value={sortBy}
+                            onChange={(e) => setSortBy(e.target.value)}
+                            className="border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+
+                            <option value="ID Asc">ID (1 → N)</option>
+                            <option value="Latest">Latest</option>
+                            <option value="Oldest">Oldest</option>
+                            <option value="Patient A-Z">Patient A-Z</option>
+                            <option value="Patient Z-A">Patient Z-A</option>
+                            <option value="ID Desc">ID (N → 1)</option>
+
+                        </select>
+
                     </div>
 
                     {filteredAppointments.length === 0 ? (
 
-                        <p className="text-gray-500">
-
-                            No appointments found.
-
-                        </p>
+                        <EmptyState
+                            title="No Appointments Found"
+                            description="Book a new appointment to get started."
+                        />
 
                     ) : (
 
