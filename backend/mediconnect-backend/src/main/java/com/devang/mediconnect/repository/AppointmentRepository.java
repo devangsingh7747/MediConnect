@@ -1,19 +1,51 @@
 package com.devang.mediconnect.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.devang.mediconnect.entity.Appointment;
 
-public interface AppointmentRepository extends JpaRepository<Appointment, Long> {
+public interface AppointmentRepository
+        extends JpaRepository<Appointment, Long> {
 
-    Long countByStatusIgnoreCase(String status);
+    Long countByStatusIgnoreCase(
+            String status
+    );
 
-    List<Appointment> findTop5ByOrderByCreatedAtDesc();
+    List<Appointment>
+    findTop5ByOrderByCreatedAtDesc();
 
-    List<Appointment> findByDoctorNameOrderByAppointmentDateAscAppointmentTimeAsc(
-        String doctorName
+    /*
+     * Secure patient appointment history.
+     */
+    List<Appointment>
+    findByPatientEmailIgnoreCaseOrderByAppointmentDateAscAppointmentTimeAsc(
+            String patientEmail
+    );
+
+    /*
+     * Secure ownership lookup for patient operations.
+     */
+    Optional<Appointment>
+    findByIdAndPatientEmailIgnoreCase(
+            Long id,
+            String patientEmail
+    );
+
+    /*
+     * Secure ownership lookup for doctor operations.
+     */
+    Optional<Appointment>
+    findByIdAndDoctorEmailIgnoreCase(
+            Long id,
+            String doctorEmail
+    );
+
+    List<Appointment>
+    findByDoctorNameOrderByAppointmentDateAscAppointmentTimeAsc(
+            String doctorName
     );
 
     List<Appointment>
@@ -22,23 +54,22 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     );
 
     long countByDoctorName(
-        String doctorName
+            String doctorName
     );
 
     long countByDoctorNameAndStatus(
-        String doctorName,
-        String status
+            String doctorName,
+            String status
     );
 
     long countByDoctorNameAndAppointmentDate(
-        String doctorName,
-        String appointmentDate
+            String doctorName,
+            String appointmentDate
     );
 
     boolean existsByDoctorNameAndAppointmentDateAndAppointmentTime(
-        String doctorName,
-        String appointmentDate,
-        String appointmentTime
+            String doctorName,
+            String appointmentDate,
+            String appointmentTime
     );
-
 }

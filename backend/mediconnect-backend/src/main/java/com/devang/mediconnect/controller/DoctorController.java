@@ -1,5 +1,6 @@
 package com.devang.mediconnect.controller;
 
+import java.security.Principal;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
@@ -25,22 +26,96 @@ public class DoctorController {
             DoctorService doctorService) {
 
         this.doctorService = doctorService;
-
     }
+
+    /*
+     * Secure endpoint:
+     * Uses the authenticated doctor's JWT email.
+     */
+    @GetMapping("/me")
+    public ResponseEntity<Doctor> getCurrentDoctor(
+            Principal principal) {
+
+        Doctor doctor =
+                doctorService.getDoctorByEmail(
+                        principal.getName()
+                );
+
+        if (doctor == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(doctor);
+    }
+
+    /*
+     * Secure endpoint:
+     * A doctor can update only their own profile.
+     */
+    @PutMapping("/me")
+    public ResponseEntity<Doctor> updateCurrentDoctor(
+            Principal principal,
+            @RequestBody Doctor doctor) {
+
+        Doctor existingDoctor =
+                doctorService.getDoctorByEmail(
+                        principal.getName()
+                );
+
+        if (existingDoctor == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        /*
+         * Prevent request data from changing profile ownership.
+         */
+        doctor.setEmail(principal.getName());
+
+        Doctor updatedDoctor =
+                doctorService.updateDoctor(
+                        existingDoctor.getId(),
+                        doctor
+                );
+
+        return ResponseEntity.ok(updatedDoctor);
+    }
+
+    /*
+     * Secure availability endpoint.
+     */
+    @PutMapping("/me/availability")
+    public ResponseEntity<Doctor> updateCurrentAvailability(
+            Principal principal,
+            @RequestBody String availability) {
+
+        Doctor updatedDoctor =
+                doctorService.updateAvailability(
+                        principal.getName(),
+                        availability
+                );
+
+        if (updatedDoctor == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(updatedDoctor);
+    }
+
+    /*
+     * Older development endpoints are kept temporarily.
+     */
 
     @PostMapping
     public Doctor saveDoctor(
             @RequestBody Doctor doctor) {
 
         return doctorService.saveDoctor(doctor);
-
     }
 
     @GetMapping
     public List<Doctor> getAllDoctors() {
 
         return doctorService.getAllDoctors();
-
     }
 
     @GetMapping("/{id}")
@@ -51,13 +126,10 @@ public class DoctorController {
                 doctorService.getDoctorById(id);
 
         if (doctor == null) {
-
             return ResponseEntity.notFound().build();
-
         }
 
         return ResponseEntity.ok(doctor);
-
     }
 
     @GetMapping("/email/{email}")
@@ -68,13 +140,10 @@ public class DoctorController {
                 doctorService.getDoctorByEmail(email);
 
         if (doctor == null) {
-
             return ResponseEntity.notFound().build();
-
         }
 
         return ResponseEntity.ok(doctor);
-
     }
 
     @PutMapping("/{id}")
@@ -89,13 +158,10 @@ public class DoctorController {
                 );
 
         if (updatedDoctor == null) {
-
             return ResponseEntity.notFound().build();
-
         }
 
         return ResponseEntity.ok(updatedDoctor);
-
     }
 
     @PutMapping("/email/{email}/availability")
@@ -110,13 +176,10 @@ public class DoctorController {
                 );
 
         if (updatedDoctor == null) {
-
             return ResponseEntity.notFound().build();
-
         }
 
         return ResponseEntity.ok(updatedDoctor);
-
     }
 
     @DeleteMapping("/{id}")
@@ -126,7 +189,5 @@ public class DoctorController {
         doctorService.deleteDoctor(id);
 
         return ResponseEntity.noContent().build();
-
     }
-
 }

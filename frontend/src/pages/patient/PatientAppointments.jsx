@@ -15,10 +15,6 @@ import api from "../../services/api";
 
 const PatientAppointments = () => {
 
-    const user = JSON.parse(
-        localStorage.getItem("user") || "{}"
-    );
-
     const [appointments, setAppointments] = useState([]);
     const [cancellingId, setCancellingId] = useState(null);
 
@@ -44,14 +40,11 @@ const PatientAppointments = () => {
 
             try {
 
-                const response = await api.get("/appointments");
-
-                const patientAppointments = response.data.filter(
-                    (appointment) =>
-                        appointment.patientEmail === user.email
+                const response = await api.get(
+                    "/appointments/my"
                 );
 
-                setAppointments(patientAppointments);
+                setAppointments(response.data);
 
             } catch (error) {
 
@@ -68,7 +61,7 @@ const PatientAppointments = () => {
 
         fetchAppointments();
 
-    }, [user.email]);
+    }, []);
 
     const handleCancelAppointment = (appointmentId) => {
 
@@ -105,10 +98,8 @@ const PatientAppointments = () => {
             setCancellingId(selectedAppointmentId);
 
             await api.put(
-                `/appointments/${selectedAppointmentId}/status`,
-                {
-                    status: "Cancelled"
-                }
+                `/appointments/my/${selectedAppointmentId}/cancel`,
+                {}
             );
 
             setAppointments((previousAppointments) =>

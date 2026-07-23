@@ -13,29 +13,34 @@ import {
 } from "react-icons/fa";
 
 import PatientLayout from "../../components/patient/PatientLayout";
-import api from "../../services/api";
+
+import {
+    getCurrentPatient,
+    updateCurrentPatient
+} from "../../services/patientService";
 
 const PatientProfile = () => {
 
-    const loggedInUser = JSON.parse(
-        localStorage.getItem("user") || "{}"
-    );
-
     const [profile, setProfile] = useState({
-
         firstName: "",
         lastName: "",
-        email: loggedInUser.email || "",
+        email: "",
         phone: "",
         age: "",
         gender: ""
-
     });
 
-    const [originalProfile, setOriginalProfile] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [saving, setSaving] = useState(false);
-    const [editing, setEditing] = useState(false);
+    const [originalProfile, setOriginalProfile] =
+        useState(null);
+
+    const [loading, setLoading] =
+        useState(true);
+
+    const [saving, setSaving] =
+        useState(false);
+
+    const [editing, setEditing] =
+        useState(false);
 
     useEffect(() => {
 
@@ -43,25 +48,34 @@ const PatientProfile = () => {
 
             try {
 
-                const response = await api.get(
-                    `/patients/email/${loggedInUser.email}`
-                );
-
-                const patient = response.data;
+                const patient =
+                    await getCurrentPatient();
 
                 const patientProfile = {
+                    firstName:
+                        patient.firstName || "",
 
-                    firstName: patient.firstName || "",
-                    lastName: patient.lastName || "",
-                    email: patient.email || loggedInUser.email || "",
-                    phone: patient.phone || "",
-                    age: patient.age ?? "",
-                    gender: patient.gender || ""
+                    lastName:
+                        patient.lastName || "",
 
+                    email:
+                        patient.email || "",
+
+                    phone:
+                        patient.phone || "",
+
+                    age:
+                        patient.age ?? "",
+
+                    gender:
+                        patient.gender || ""
                 };
 
                 setProfile(patientProfile);
-                setOriginalProfile(patientProfile);
+
+                setOriginalProfile(
+                    patientProfile
+                );
 
             } catch (error) {
 
@@ -70,103 +84,114 @@ const PatientProfile = () => {
                     error
                 );
 
-                toast.error("Unable to load your profile.");
+                if (
+                    error.response?.status === 401 ||
+                    error.response?.status === 403
+                ) {
+
+                    toast.error(
+                        "Your session has expired. Please log in again."
+                    );
+
+                } else {
+
+                    toast.error(
+                        "Unable to load your profile."
+                    );
+                }
 
             } finally {
 
                 setLoading(false);
-
             }
-
         };
 
-        if (loggedInUser.email) {
+        fetchProfile();
 
-            fetchProfile();
-
-        } else {
-
-            setLoading(false);
-
-            toast.error("Logged-in user information is missing.");
-
-        }
-
-    }, [loggedInUser.email]);
+    }, []);
 
     const handleChange = (event) => {
 
-        const { name, value } = event.target;
+        const { name, value } =
+            event.target;
 
         setProfile((previous) => ({
-
             ...previous,
             [name]: value
-
         }));
-
     };
 
     const handleEdit = () => {
 
         setEditing(true);
-
     };
 
     const handleCancel = () => {
 
         if (originalProfile) {
 
-            setProfile(originalProfile);
-
+            setProfile({
+                ...originalProfile
+            });
         }
 
         setEditing(false);
-
     };
 
     const handleSave = async (event) => {
 
         event.preventDefault();
 
-        if (!profile.firstName.trim()) {
+        const firstName =
+            profile.firstName.trim();
 
-            toast.error("First name is required.");
+        const lastName =
+            profile.lastName.trim();
 
-            return;
+        const phone =
+            profile.phone.trim();
 
-        }
+        if (!firstName) {
 
-        if (!profile.lastName.trim()) {
-
-            toast.error("Last name is required.");
-
-            return;
-
-        }
-
-        if (!profile.phone.trim()) {
-
-            toast.error("Phone number is required.");
+            toast.error(
+                "First name is required."
+            );
 
             return;
-
         }
 
-        if (!/^\d{10}$/.test(profile.phone.trim())) {
+        if (!lastName) {
+
+            toast.error(
+                "Last name is required."
+            );
+
+            return;
+        }
+
+        if (!phone) {
+
+            toast.error(
+                "Phone number is required."
+            );
+
+            return;
+        }
+
+        if (!/^\d{10}$/.test(phone)) {
 
             toast.error(
                 "Phone number must contain exactly 10 digits."
             );
 
             return;
-
         }
 
-        const numericAge = Number(profile.age);
+        const numericAge =
+            Number(profile.age);
 
         if (
-            !numericAge ||
+            !Number.isInteger(numericAge) ||
             numericAge < 1 ||
             numericAge > 120
         ) {
@@ -176,54 +201,71 @@ const PatientProfile = () => {
             );
 
             return;
-
         }
 
         if (!profile.gender) {
 
-            toast.error("Please select your gender.");
+            toast.error(
+                "Please select your gender."
+            );
 
             return;
-
         }
 
         try {
 
             setSaving(true);
 
-            const response = await api.put(
-                `/patients/email/${loggedInUser.email}`,
-                {
-                    firstName: profile.firstName.trim(),
-                    lastName: profile.lastName.trim(),
-                    phone: profile.phone.trim(),
+            const updatedPatient =
+                await updateCurrentPatient({
+                    firstName,
+                    lastName,
+                    phone,
                     age: numericAge,
                     gender: profile.gender
-                }
-            );
-
-            const updatedPatient = response.data;
+                });
 
             const updatedProfile = {
+                firstName:
+                    updatedPatient.firstName || "",
 
-                firstName: updatedPatient.firstName || "",
-                lastName: updatedPatient.lastName || "",
-                email: updatedPatient.email || loggedInUser.email,
-                phone: updatedPatient.phone || "",
-                age: updatedPatient.age ?? "",
-                gender: updatedPatient.gender || ""
+                lastName:
+                    updatedPatient.lastName || "",
 
+                email:
+                    updatedPatient.email ||
+                    profile.email,
+
+                phone:
+                    updatedPatient.phone || "",
+
+                age:
+                    updatedPatient.age ?? "",
+
+                gender:
+                    updatedPatient.gender || ""
             };
 
             setProfile(updatedProfile);
-            setOriginalProfile(updatedProfile);
+
+            setOriginalProfile(
+                updatedProfile
+            );
+
             setEditing(false);
 
+            const loggedInUser =
+                JSON.parse(
+                    localStorage.getItem("user") ||
+                    "{}"
+                );
+
             const updatedUser = {
-
                 ...loggedInUser,
-                fullName: `${updatedProfile.firstName} ${updatedProfile.lastName}`.trim()
 
+                fullName:
+                    `${updatedProfile.firstName} ${updatedProfile.lastName}`
+                        .trim()
             };
 
             localStorage.setItem(
@@ -231,7 +273,9 @@ const PatientProfile = () => {
                 JSON.stringify(updatedUser)
             );
 
-            toast.success("Profile updated successfully.");
+            toast.success(
+                "Profile updated successfully."
+            );
 
         } catch (error) {
 
@@ -240,19 +284,32 @@ const PatientProfile = () => {
                 error
             );
 
-            let message = "Unable to update your profile.";
+            let message =
+                "Unable to update your profile.";
 
             if (
-                typeof error.response?.data === "string" &&
+                error.response?.status === 401 ||
+                error.response?.status === 403
+            ) {
+
+                message =
+                    "Your session has expired. Please log in again.";
+
+            } else if (
+                typeof error.response?.data ===
+                    "string" &&
                 error.response.data.trim() !== ""
             ) {
 
-                message = error.response.data;
+                message =
+                    error.response.data;
 
-            } else if (error.response?.data?.message) {
+            } else if (
+                error.response?.data?.message
+            ) {
 
-                message = error.response.data.message;
-
+                message =
+                    error.response.data.message;
             }
 
             toast.error(message);
@@ -260,9 +317,7 @@ const PatientProfile = () => {
         } finally {
 
             setSaving(false);
-
         }
-
     };
 
     if (loading) {
@@ -282,9 +337,7 @@ const PatientProfile = () => {
                 </div>
 
             </PatientLayout>
-
         );
-
     }
 
     return (
@@ -321,7 +374,9 @@ const PatientProfile = () => {
 
                         <h2 className="text-2xl font-bold text-center mt-5">
 
-                            {profile.firstName || "Patient"}{" "}
+                            {profile.firstName ||
+                                "Patient"}{" "}
+
                             {profile.lastName}
 
                         </h2>
@@ -348,8 +403,7 @@ const PatientProfile = () => {
                                     profile.age &&
                                     profile.gender
                                         ? "Completed"
-                                        : "Incomplete"
-                                    }
+                                        : "Incomplete"}
 
                                 </p>
 
@@ -408,7 +462,6 @@ const PatientProfile = () => {
                                     Edit Profile
 
                                 </button>
-
                             )}
 
                         </div>
@@ -432,9 +485,15 @@ const PatientProfile = () => {
                                         <input
                                             type="text"
                                             name="firstName"
-                                            value={profile.firstName}
-                                            onChange={handleChange}
-                                            disabled={!editing}
+                                            value={
+                                                profile.firstName
+                                            }
+                                            onChange={
+                                                handleChange
+                                            }
+                                            disabled={
+                                                !editing
+                                            }
                                             className="
                                                 w-full
                                                 border
@@ -469,9 +528,15 @@ const PatientProfile = () => {
                                         <input
                                             type="text"
                                             name="lastName"
-                                            value={profile.lastName}
-                                            onChange={handleChange}
-                                            disabled={!editing}
+                                            value={
+                                                profile.lastName
+                                            }
+                                            onChange={
+                                                handleChange
+                                            }
+                                            disabled={
+                                                !editing
+                                            }
                                             className="
                                                 w-full
                                                 border
@@ -505,7 +570,9 @@ const PatientProfile = () => {
 
                                         <input
                                             type="email"
-                                            value={profile.email}
+                                            value={
+                                                profile.email
+                                            }
                                             disabled
                                             className="w-full border rounded-xl pl-11 pr-4 py-3 bg-gray-100 text-gray-600 cursor-not-allowed"
                                         />
@@ -535,10 +602,17 @@ const PatientProfile = () => {
                                         <input
                                             type="tel"
                                             name="phone"
-                                            value={profile.phone}
-                                            onChange={handleChange}
-                                            disabled={!editing}
+                                            value={
+                                                profile.phone
+                                            }
+                                            onChange={
+                                                handleChange
+                                            }
+                                            disabled={
+                                                !editing
+                                            }
                                             maxLength={10}
+                                            inputMode="numeric"
                                             placeholder="Enter 10-digit phone number"
                                             className="
                                                 w-full
@@ -574,9 +648,15 @@ const PatientProfile = () => {
                                         <input
                                             type="number"
                                             name="age"
-                                            value={profile.age}
-                                            onChange={handleChange}
-                                            disabled={!editing}
+                                            value={
+                                                profile.age
+                                            }
+                                            onChange={
+                                                handleChange
+                                            }
+                                            disabled={
+                                                !editing
+                                            }
                                             min="1"
                                             max="120"
                                             placeholder="Enter age"
@@ -613,9 +693,15 @@ const PatientProfile = () => {
 
                                         <select
                                             name="gender"
-                                            value={profile.gender}
-                                            onChange={handleChange}
-                                            disabled={!editing}
+                                            value={
+                                                profile.gender
+                                            }
+                                            onChange={
+                                                handleChange
+                                            }
+                                            disabled={
+                                                !editing
+                                            }
                                             className="
                                                 w-full
                                                 border
@@ -677,14 +763,15 @@ const PatientProfile = () => {
 
                                         {saving
                                             ? "Saving..."
-                                            : "Save Changes"
-                                        }
+                                            : "Save Changes"}
 
                                     </button>
 
                                     <button
                                         type="button"
-                                        onClick={handleCancel}
+                                        onClick={
+                                            handleCancel
+                                        }
                                         disabled={saving}
                                         className="inline-flex items-center justify-center gap-2 sm:w-44 border border-gray-300 hover:bg-gray-100 text-gray-700 font-semibold py-3 rounded-xl transition cursor-pointer disabled:cursor-not-allowed"
                                     >
@@ -696,7 +783,6 @@ const PatientProfile = () => {
                                     </button>
 
                                 </div>
-
                             )}
 
                         </form>
@@ -708,9 +794,7 @@ const PatientProfile = () => {
             </div>
 
         </PatientLayout>
-
     );
-
 };
 
 export default PatientProfile;

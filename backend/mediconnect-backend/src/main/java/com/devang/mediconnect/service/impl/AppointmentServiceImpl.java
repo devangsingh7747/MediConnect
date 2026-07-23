@@ -493,4 +493,156 @@ public class AppointmentServiceImpl
                         "Completed"
                 );
         }
+
+        @Override
+        public List<Appointment> getAppointmentsByPatientEmail(
+                String patientEmail) {
+
+        return appointmentRepository
+                .findByPatientEmailIgnoreCaseOrderByAppointmentDateAscAppointmentTimeAsc(
+                        patientEmail
+                );
+        }
+
+        @Override
+        public Appointment cancelPatientAppointment(
+                Long appointmentId,
+                String patientEmail) {
+
+        Appointment appointment =
+                appointmentRepository
+                        .findByIdAndPatientEmailIgnoreCase(
+                                appointmentId,
+                                patientEmail
+                        )
+                        .orElseThrow(
+                                () -> new RuntimeException(
+                                        "Appointment not found or you are not allowed to cancel it."
+                                )
+                        );
+
+        String currentStatus =
+                appointment.getStatus();
+
+        boolean canCancel =
+                "Pending".equalsIgnoreCase(currentStatus)
+                        || "Confirmed".equalsIgnoreCase(
+                                currentStatus
+                        );
+
+        if (!canCancel) {
+
+                throw new RuntimeException(
+                        "Only pending or confirmed appointments can be cancelled."
+                );
+        }
+
+        return updateAppointmentStatus(
+                appointmentId,
+                "Cancelled"
+        );
+        }
+
+        @Override
+        public Appointment acceptDoctorAppointment(
+                Long appointmentId,
+                String doctorEmail) {
+
+        Appointment appointment =
+                appointmentRepository
+                        .findByIdAndDoctorEmailIgnoreCase(
+                                appointmentId,
+                                doctorEmail
+                        )
+                        .orElseThrow(
+                                () -> new RuntimeException(
+                                        "Appointment not found or it is not assigned to you."
+                                )
+                        );
+
+        if (!"Pending".equalsIgnoreCase(
+                appointment.getStatus()
+        )) {
+
+                throw new RuntimeException(
+                        "Only pending appointments can be accepted."
+                );
+        }
+
+        return updateAppointmentStatus(
+                appointmentId,
+                "Confirmed"
+        );
+        }
+
+        @Override
+        public Appointment rejectDoctorAppointment(
+                Long appointmentId,
+                String doctorEmail) {
+
+        Appointment appointment =
+                appointmentRepository
+                        .findByIdAndDoctorEmailIgnoreCase(
+                                appointmentId,
+                                doctorEmail
+                        )
+                        .orElseThrow(
+                                () -> new RuntimeException(
+                                        "Appointment not found or it is not assigned to you."
+                                )
+                        );
+
+        String currentStatus =
+                appointment.getStatus();
+
+        boolean canReject =
+                "Pending".equalsIgnoreCase(currentStatus)
+                        || "Confirmed".equalsIgnoreCase(
+                                currentStatus
+                        );
+
+        if (!canReject) {
+
+                throw new RuntimeException(
+                        "Only pending or confirmed appointments can be rejected."
+                );
+        }
+
+        return updateAppointmentStatus(
+                appointmentId,
+                "Rejected"
+        );
+        }
+
+        @Override
+        public Appointment completeDoctorAppointment(
+                Long appointmentId,
+                String doctorEmail) {
+
+        Appointment appointment =
+                appointmentRepository
+                        .findByIdAndDoctorEmailIgnoreCase(
+                                appointmentId,
+                                doctorEmail
+                        )
+                        .orElseThrow(
+                                () -> new RuntimeException(
+                                        "Appointment not found or it is not assigned to you."
+                                )
+                        );
+
+        if (!"Confirmed".equalsIgnoreCase(
+                appointment.getStatus()
+        )) {
+
+                throw new RuntimeException(
+                        "Only confirmed appointments can be marked as completed."
+                );
+        }
+
+        return updateAppointmentStatus(
+                appointmentId,
+                "Completed"
+        );
+        }
 }

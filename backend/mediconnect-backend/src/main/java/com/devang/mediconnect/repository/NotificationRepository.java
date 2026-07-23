@@ -9,18 +9,18 @@ import com.devang.mediconnect.entity.Notification;
 public interface NotificationRepository
         extends JpaRepository<Notification, Long> {
 
-    List<Notification>
-            findTop10ByEmailIgnoreCaseOrderByCreatedAtDesc(
-                    String email
-            );
+        List<Notification>
+                findTop10ByEmailIgnoreCaseOrderByCreatedAtDesc(
+                        String email
+                );
 
-    List<Notification>
-            findByEmailIgnoreCaseOrderByCreatedAtDesc(
-                    String email
-            );
+        List<Notification>
+                findByEmailIgnoreCaseOrderByCreatedAtDesc(
+                        String email
+                );
 
-    long countByEmailIgnoreCaseAndIsReadFalse(
-            String email
-    );
+        long countByEmailIgnoreCaseAndIsReadFalse(
+                String email
+        );
 
 }

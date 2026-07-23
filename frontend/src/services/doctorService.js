@@ -15,19 +15,9 @@ const getAuthHeaders = () => {
         : {};
 };
 
-export const getDoctorByEmail = async (
-    email
-) => {
-    if (!email) {
-        throw new Error(
-            "Doctor email is required."
-        );
-    }
-
+export const getDoctorByEmail = async () => {
     const response = await axios.get(
-        `${API_BASE_URL}/api/doctors/email/${encodeURIComponent(
-            email
-        )}`,
+        `${API_BASE_URL}/api/doctors/me`,
         {
             headers: getAuthHeaders(),
         }
@@ -40,20 +30,15 @@ export const updateDoctorProfile = async (
     doctorId,
     doctorData
 ) => {
-    if (!doctorId) {
-        throw new Error(
-            "Doctor ID is required."
-        );
-    }
+    void doctorId;
 
     const response = await axios.put(
-        `${API_BASE_URL}/api/doctors/${doctorId}`,
+        `${API_BASE_URL}/api/doctors/me`,
         doctorData,
         {
             headers: {
                 ...getAuthHeaders(),
-                "Content-Type":
-                    "application/json",
+                "Content-Type": "application/json",
             },
         }
     );
@@ -63,11 +48,12 @@ export const updateDoctorProfile = async (
 
 export const updateDoctorAvailability =
     async (email, availability) => {
-        if (!email) {
-            throw new Error(
-                "Doctor email is required."
-            );
-        }
+
+        /*
+         * Email is retained only for backward compatibility.
+         * The backend now identifies the doctor from JWT.
+         */
+        void email;
 
         const normalizedAvailability =
             availability
@@ -75,10 +61,8 @@ export const updateDoctorAvailability =
                 .toUpperCase();
 
         if (
-            normalizedAvailability !==
-                "AVAILABLE" &&
-            normalizedAvailability !==
-                "UNAVAILABLE"
+            normalizedAvailability !== "AVAILABLE" &&
+            normalizedAvailability !== "UNAVAILABLE"
         ) {
             throw new Error(
                 "Availability must be AVAILABLE or UNAVAILABLE."
@@ -86,15 +70,12 @@ export const updateDoctorAvailability =
         }
 
         const response = await axios.put(
-            `${API_BASE_URL}/api/doctors/email/${encodeURIComponent(
-                email
-            )}/availability`,
+            `${API_BASE_URL}/api/doctors/me/availability`,
             normalizedAvailability,
             {
                 headers: {
                     ...getAuthHeaders(),
-                    "Content-Type":
-                        "text/plain",
+                    "Content-Type": "text/plain",
                 },
             }
         );

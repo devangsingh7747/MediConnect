@@ -1,5 +1,6 @@
 package com.devang.mediconnect.controller;
 
+import java.security.Principal;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
@@ -25,22 +26,69 @@ public class PatientController {
             PatientService patientService) {
 
         this.patientService = patientService;
-
     }
+
+    /*
+     * Secure endpoint:
+     * Uses the email obtained from the authenticated JWT.
+     */
+    @GetMapping("/me")
+    public ResponseEntity<Patient> getCurrentPatient(
+            Principal principal) {
+
+        Patient patient =
+                patientService.getPatientByEmail(
+                        principal.getName()
+                );
+
+        if (patient == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(patient);
+    }
+
+    /*
+     * Secure endpoint:
+     * A patient can update only the profile connected
+     * to the authenticated JWT.
+     */
+    @PutMapping("/me")
+    public ResponseEntity<Patient> updateCurrentPatient(
+            Principal principal,
+            @RequestBody Patient patient) {
+
+        patient.setEmail(principal.getName());
+
+        Patient updatedPatient =
+                patientService.updatePatientByEmail(
+                        principal.getName(),
+                        patient
+                );
+
+        if (updatedPatient == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(updatedPatient);
+    }
+
+    /*
+     * Older development endpoints are kept temporarily.
+     * They will be restricted or removed in a later cleanup.
+     */
 
     @PostMapping
     public Patient savePatient(
             @RequestBody Patient patient) {
 
         return patientService.savePatient(patient);
-
     }
 
     @GetMapping
     public List<Patient> getAllPatients() {
 
         return patientService.getAllPatients();
-
     }
 
     @GetMapping("/{id}")
@@ -51,13 +99,10 @@ public class PatientController {
                 patientService.getPatientById(id);
 
         if (patient == null) {
-
             return ResponseEntity.notFound().build();
-
         }
 
         return ResponseEntity.ok(patient);
-
     }
 
     @GetMapping("/email/{email}")
@@ -68,13 +113,10 @@ public class PatientController {
                 patientService.getPatientByEmail(email);
 
         if (patient == null) {
-
             return ResponseEntity.notFound().build();
-
         }
 
         return ResponseEntity.ok(patient);
-
     }
 
     @PutMapping("/{id}")
@@ -89,13 +131,10 @@ public class PatientController {
                 );
 
         if (updatedPatient == null) {
-
             return ResponseEntity.notFound().build();
-
         }
 
         return ResponseEntity.ok(updatedPatient);
-
     }
 
     @PutMapping("/email/{email}")
@@ -110,13 +149,10 @@ public class PatientController {
                 );
 
         if (updatedPatient == null) {
-
             return ResponseEntity.notFound().build();
-
         }
 
         return ResponseEntity.ok(updatedPatient);
-
     }
 
     @DeleteMapping("/{id}")
@@ -126,7 +162,5 @@ public class PatientController {
         patientService.deletePatient(id);
 
         return ResponseEntity.noContent().build();
-
     }
-
 }
